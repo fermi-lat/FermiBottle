@@ -20,15 +20,17 @@ export USER=fermi
 export LOGNAME=fermi
 export MAIL=/var/spool/mail/fermi
 export ASTROSOFT=$HOME/astrosoft
-export PATH=$ASTROSOFT/bin:/usr/local/bin/rmfit_v432:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+export PATH=$ASTROSOFT:/opt/anaconda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+export PATH=$ASTROSOFT/bin:/usr/local/bin/rmfit_v432:${PATH}
 export PATH=$ASTROSOFT/tempo/bin:$ASTROSOFT/tempo2/bin:$ASTROSOFT/pgplot:$PATH
 export HEADAS=$HOME/astrosoft/ftools/x86_64-pc-linux-gnu-libc2.12
 export TEMPO2=$HOME/astrosoft/tempo2/T2runtime
-export FERMI_DIR=$HOME/astrosoft/sciencetools/x86_64-unknown-linux-gnu-libc2.12
-export LD_LIBRARY_PATH=$ASTROSOFT/pgplot
 
 ## Solve permissions issues
 ln -s /home/astrosoft /home/fermi/astrosoft
+/opt/anaconda/bin/conda config --add channels conda-forge
+/opt/anaconda/bin/conda config --add channels fermi_dev_externals
+chown fermi:fermi $HOME/.condarc
 chown fermi:fermi $HOME/astrosoft
 chown fermi:fermi $HOME
 cd $HOME
@@ -44,13 +46,10 @@ export MAIL=${MAIL}
 export ASTROSOFT=${ASTROSOFT}
 export HEADAS=${HEADAS}
 export TEMPO2=${TEMPO2}
-export FERMI_DIR=${FERMI_DIR}
 export PATH=${PATH}:\$PATH
-export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:\$LD_LIBRARY_PATH
 
 # Source the tools!
 . \$HEADAS/headas-init.sh
-. \$FERMI_DIR/fermi-init.sh
 
 " >> $HOME/.bash_profile
 fi
@@ -64,10 +63,10 @@ alias notebook='jupyter notebook --ip 00.00.00.00 --no-browser'
 fi
 
 # Source everything that needs to be.
+. /opt/anaconda/bin/activate fermi
 . $HEADAS/headas-init.sh
-. $FERMI_DIR/fermi-init.sh
 chown -R fermi:fermi $HOME/pfiles
 
 # Run whatever the user wants.
 echo "Welcome to the Fermi Container."
-exec $FERMI_DIR/bin/pysu fermi "$@"
+exec /opt/anaconda/bin/gosu fermi "$@"

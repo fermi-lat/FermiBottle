@@ -68,25 +68,16 @@ RUN mkdir -p $ASTROPFX
 COPY setup_ftools.sh $HOME/setup_ftools.sh
 RUN sh setup_ftools.sh && rm setup_ftools.sh
 
-# ScienceTools. Begin by setting some env vars, then
-# Running our setup script. Note that this will also upgrade
-# the version of python in the Sciencetools.
-ENV STNAME ScienceTools-v11r5p3-fssc-20180124
-ENV PLAT x86_64-unknown-linux-gnu-libc2.12
-ENV STPFX $ASTROPFX/sciencetools
-COPY setup_sciencetools.sh $HOME/setup_sciencetools.sh
-RUN sh setup_sciencetools.sh && rm setup_sciencetools.sh
+# Add a timestamp for the build. Also, bust the cache.
+ADD https://now.httpbin.org/when/now /opt/docker/etc/timestamp
 
-# Install pip and necessary tools.
-# This should really be its own script, but it isn't because
-# of no good reason.
-ENV FERMI_DIR ${STPFX}/${PLAT}
-RUN source $FERMI_DIR/fermi-init.sh && \
-  echo $FERMI_DIR && \
-  which python && python --version && \
-  curl https://bootstrap.pypa.io/get-pip.py | python && \
-  pip install numpy scipy astropy matplotlib jupyter pysu &&\
-  pip install pmw pyfits pywcs pyds9 pysqlite fermipy
+# Anaconda Fermitools, and other conda packages
+ENV CONDAPFX /opt/anaconda
+COPY setup_anaconda.sh $HOME/setup_anaconda.sh
+RUN sh setup_anaconda.sh && rm setup_anaconda.sh
+
+# Fermitools prefix
+ENV FERMIPFX $CONDAPFX/envs/fermi
 
 # Tempo
 COPY setup_tempo.sh $HOME/setup_tempo.sh
@@ -134,20 +125,19 @@ MAINTAINER "Fermi LAT Collaboration"
 VOLUME ["/data"]
 
 # This is the default command that docker will run if no other command is
-# specified, that's fine because we want it to just drop into a bash shell.
-# Not do anything fancy.
+# specified, that's fine because we want it to just drop into a bash shell,
+# not do anything fancy.
 CMD [ "/bin/bash" ]
 
 # Prepary the Environment of the new Container
 ENV ASTROPFX /home/astrosoft
 RUN mkdir -p $ASTROPFX
-ENV FERMI_DIR $ASTROPFX/sciencetools/x86_64-unknown-linux-gnu-libc2.12
 
 # Copy all the important stuff from the builder into the final product.
 # Also, set the permissions to give the wheel group ownership.
+COPY --from=builder --chown=root:wheel /opt/anaconda /opt/anaconda
 COPY --from=builder --chown=root:wheel $ASTROPFX/ftools $ASTROPFX/ftools
 COPY --from=builder --chown=root:wheel $ASTROPFX/tempo $ASTROPFX/tempo
-COPY --from=builder --chown=root:wheel $ASTROPFX/sciencetools $ASTROPFX/sciencetools
 COPY --from=builder --chown=root:wheel $ASTROPFX/pgplot $ASTROPFX/pgplot
 COPY --from=builder --chown=root:wheel $ASTROPFX/tempo2 $ASTROPFX/tempo2
 COPY --from=builder --chown=root:wheel $ASTROPFX/bin $ASTROPFX/bin
@@ -200,6 +190,9 @@ rm -rf /var/cache/yum
 RUN echo -e '%wheel        ALL=(ALL)       NOPASSWD: ALL\n\
 fermi        ALL=NOPASSWD: ALL\n\
 fermi ALL=NOPASSWD: /usr/bin/yum' >> /etc/sudoers
+
+RUN echo '/home/fermi/astrosoft/pgplot' >> /etc/ld.so.conf.d/pgplotlibs.conf
+RUN echo '/opt/anaconda/envs/fermi/lib' >> /etc/ld.so.conf.d/condalibs.conf
 
 
 # The entrypoint script is very important. It is the starter script run
