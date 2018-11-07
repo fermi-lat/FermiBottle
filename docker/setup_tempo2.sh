@@ -29,8 +29,7 @@ TEMPO2PFX=$ASTROPFX/tempo2
 XINC="/usr/include"
 XLIB="/usr/X11R6/lib"
 CFITSIO="$ASTROPFX/ftools/$PLAT"
-SCITOOLS="$ASTROPFX/sciencetools/$PLAT"
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$SCITOOLS/lib"
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$FERMIPFX/lib"
 mkdir -p $TEMPO2PFX
 curl -s -L https://bitbucket.org/psrsoft/tempo2/downloads/tempo2-2018.02.1.tar.gz > tempo2.tar.gz
 tar zxf tempo2.tar.gz
@@ -44,14 +43,14 @@ cp -r T2runtime $TEMPO2PFX
   --x-libraries="${XLIB} -lXdmcp" \
   --with-pgplot-extra="-lX11 -lXdmcp -lz -lpng" \
   --with-cfitsio-dir=$CFITSIO \
-  --with-fftw3-include-dir="$SCITOOLS/include/fftw" \
-  --with-fftw3-lib-dir="$SCITOOLS/lib" \
-  --with-gsl-prefix="$SCITOOLS/include/gsl" \
-  --with-gsl-exec-prefix="$SCITOOLS" \
+  --with-fftw3-include-dir="$FERMIPFX/include" \
+  --with-fftw3-lib-dir="$FERMIPFX/lib" \
+  --with-gsl-prefix="$FERMIPFX/include/gsl" \
+  --with-gsl-exec-prefix="$FERMIPFX" \
   --with-x \
-  CFLAGS="-fPIC -I$CFITSIO/include -I$ASTROPFX/sciencetools/$PLAT/include -I$ASTROPFX/pgplot" \
+  CFLAGS="-fPIC -I$CFITSIO/include -I$FERMIPFX/include -I$ASTROPFX/pgplot" \
   FFLAGS=-fPIC \
-  CXXFLAGS="-I$CFITSIO/include -I$ASTROPFX/sciencetools/$PLAT/include -I$ASTROPFX/pgplot" \
+  CXXFLAGS="-I$CFITSIO/include -I$FERMIPFX/include -I$ASTROPFX/pgplot" \
   PGPLOT_DIR="$ASTROPFX/pgplot " \
   PGPLOT_DEV=/xwindow
 make
