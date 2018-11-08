@@ -1,6 +1,6 @@
 # FermiBottle DockerFile
 # maintained by the FSSC
-# Author: Alex Resutle
+# Author: Alex Reustle
 #
 # This is a two stage dockerfile building the fermi science tools
 # and related software in a builder container, then copying
