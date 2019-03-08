@@ -69,7 +69,7 @@ COPY setup_ftools.sh $HOME/setup_ftools.sh
 RUN sh setup_ftools.sh && rm setup_ftools.sh
 
 # Add a timestamp for the build. Also, bust the cache.
-ADD https://now.httpbin.org/when/now /opt/docker/etc/timestamp
+#ADD https://now.httpbin.org/when/now /opt/docker/etc/timestamp
 
 # Anaconda Fermitools, and other conda packages
 ENV CONDAPFX /opt/anaconda
@@ -106,7 +106,7 @@ RUN sh setup_tempo2.sh && rm setup_tempo2.sh
 # DS9
 RUN mkdir $ASTROPFX/bin &&\
  cd $ASTROPFX/bin &&\
- curl http://ds9.si.edu/download/centos6/ds9.centos6.7.6.tar.gz | tar zxv
+ curl http://ds9.si.edu/download/centos6/ds9.centos6.8.0.tar.gz | tar zxv
 
 # RMFIT
 RUN cd /usr/local/bin &&\
