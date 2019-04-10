@@ -19,17 +19,17 @@ export HOME=/home/fermi
 export USER=fermi
 export LOGNAME=fermi
 export MAIL=/var/spool/mail/fermi
-export ASTROSOFT=$HOME/astrosoft
-export PATH=$ASTROSOFT:/opt/anaconda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-export PATH=$ASTROSOFT/bin:/usr/local/bin/rmfit_v432:${PATH}
-export PATH=$ASTROSOFT/tempo/bin:$ASTROSOFT/tempo2/bin:$ASTROSOFT/pgplot:$PATH
 export HEADAS=$HOME/astrosoft/ftools/x86_64-pc-linux-gnu-libc2.12
 export TEMPO2=$HOME/astrosoft/tempo2/T2runtime
+export ASTROSOFT=$HOME/astrosoft
+export PATH=$ASTROSOFT:/opt/anaconda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+export PATH=$ASTROSOFT/bin:${HEADAS}/bin:/usr/local/bin/rmfit_v432:${PATH}
+export PATH=$ASTROSOFT/tempo/bin:$ASTROSOFT/tempo2/bin:$ASTROSOFT/pgplot:$PATH
 
 ## Solve permissions issues
 ln -s /home/astrosoft /home/fermi/astrosoft
 /opt/anaconda/bin/conda config --add channels conda-forge
-/opt/anaconda/bin/conda config --add channels fermi_dev_externals
+/opt/anaconda/bin/conda config --add channels fermi
 chown fermi:fermi $HOME/.condarc
 chown fermi:fermi $HOME/astrosoft
 chown fermi:fermi $HOME
@@ -63,9 +63,11 @@ alias notebook='jupyter notebook --ip 00.00.00.00 --no-browser'
 fi
 
 # Source everything that needs to be.
-. /opt/anaconda/bin/activate fermi
+/opt/anaconda/bin/conda init --all -q > /dev/null 2>&1
+# /opt/anaconda/bin/conda activate fermi
 . $HEADAS/headas-init.sh
 chown -R fermi:fermi $HOME/pfiles
+
 
 # Run whatever the user wants.
 echo "Welcome to the Fermi Container."

@@ -76,6 +76,16 @@ ENV CONDAPFX /opt/anaconda
 COPY setup_anaconda.sh $HOME/setup_anaconda.sh
 RUN sh setup_anaconda.sh && rm setup_anaconda.sh
 
+########################
+# python 3 and gspec
+########################
+RUN curl -s -L \
+  https://fermi.gsfc.nasa.gov/ssc/data/analysis/gbm/gspec/gbm_data_tools-0.9.1.tar.gz\
+ > gbm_data_tools-0.9.1.tar.gz
+RUN $CONDAPFX/bin/conda create --name py3 -c conda-forge python=3.7 pip --yes &&\
+  $CONDAPFX/envs/py3/bin/pip install gbm_data_tools-0.9.1.tar.gz &&\
+  rm gbm_data_tools-0.9.1.tar.gz
+
 # Fermitools prefix
 ENV FERMIPFX $CONDAPFX/envs/fermi
 
@@ -173,6 +183,7 @@ yum install -y \
   perl \
   perl-ExtUtils-MakeMaker \
   readline\
+  shadow-utils\
   sqlite \
   sudo \
   tar \
@@ -184,6 +195,7 @@ yum install -y \
   zlib-devel && \
 yum clean all && \
 rm -rf /var/cache/yum
+# yum --setopt=tsflags='' reinstall shadow-utils &&\
 
 # Give members of the wheel group sudo access to execute all commands
 # Redundantly also give this access to the fermi user
@@ -191,8 +203,12 @@ RUN echo -e '%wheel        ALL=(ALL)       NOPASSWD: ALL\n\
 fermi        ALL=NOPASSWD: ALL\n\
 fermi ALL=NOPASSWD: /usr/bin/yum' >> /etc/sudoers
 
-RUN echo '/home/fermi/astrosoft/pgplot' >> /etc/ld.so.conf.d/pgplotlibs.conf
+# RUN echo "${ASTROPFX}/pgplot" >> /etc/ld.so.conf.d/pgplotlibs.conf
+# RUN echo "${ASTROPFX}/ftools/x86_64-pc-linux-gnu-libc2.12/lib" >> /etc/ld.so.conf.d/ftoollibs.conf
 RUN echo '/opt/anaconda/envs/fermi/lib' >> /etc/ld.so.conf.d/condalibs.conf
+RUN /opt/anaconda/bin/conda init bash
+# RUN sed -i '186 s/^/  : #/' ${ASTROPFX}/ftools/x86_64-pc-linux-gnu-libc2.12/BUILD_DIR/headas-setup
+RUN sed -i '135,157d' "/opt/anaconda/envs/fermi/etc/conda/activate.d/activate_fermitools.sh"
 
 
 # The entrypoint script is very important. It is the starter script run
