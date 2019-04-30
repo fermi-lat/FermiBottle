@@ -65,24 +65,54 @@ RUN mkdir -p $ASTROPFX
 # Install Heasarc Ftools from nifty script. Note, we
 # must first copy the install script into the container
 # before we can execute it, which is unfortunate.
-COPY setup_ftools.sh $HOME/setup_ftools.sh
-RUN sh setup_ftools.sh && rm setup_ftools.sh
+# COPY setup_ftools.sh $HOME/setup_ftools.sh
+# RUN sh setup_ftools.sh && rm setup_ftools.sh
+RUN curl -s -L http://heasarc.gsfc.nasa.gov/FTP/software/lheasoft/lheasoft6.24/heasoft-6.24src.tar.gz > heasoft-6.24.tar.gz && \
+tar zxf heasoft-6.24.tar.gz && \
+rm heasoft-6.24.tar.gz && \
+cd heasoft-6.24/BUILD_DIR && \
+FTOOLS=$ASTROPFX/ftools && \
+mkdir -p $FTOOLS && \
+./configure --prefix=$FTOOLS CFLAGS=-fpic --enable-collapse \
+  --with-components="heacore tcltk attitude heatools Xspec ftools " && \
+./hmake && ./hmake install && \
+cd .. && \
+rm -rf /heasoft-6.24 && \
+chmod -R g+rwx $FTOOLS
 
 # Add a timestamp for the build. Also, bust the cache.
 #ADD https://now.httpbin.org/when/now /opt/docker/etc/timestamp
 
 # Anaconda Fermitools, and other conda packages
 ENV CONDAPFX /opt/anaconda
-COPY setup_anaconda.sh $HOME/setup_anaconda.sh
-RUN sh setup_anaconda.sh && rm setup_anaconda.sh
+ENV CONDABIN ${CONDAPFX}/bin/conda
+
+RUN curl -s -L https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh > anaconda.sh && bash anaconda.sh -b -p ${CONDAPFX}
+
+RUN $CONDABIN install --yes -c conda-forge/label/cf201901 gosu tini
+RUN $CONDABIN create --name fermi -c conda-forge/label/cf201901 -c fermi \
+  astropy \
+  fermipy \
+  fermitools \
+  fermitools-data \
+  jupyter \
+  libpng \
+  matplotlib \
+  numpy \
+  pmw \
+  pyyaml \
+  scipy \
+  --yes
+RUN $CONDAPFX/bin/pip install pyds9 pysqlite
+RUN rm -rf ${CONDAPFX}/pkgs/*
+RUN chmod -R g+rwx /opt/anaconda
 
 ########################
 # python 3 and gspec
 ########################
 RUN curl -s -L \
-  https://fermi.gsfc.nasa.gov/ssc/data/analysis/gbm/gspec/gbm_data_tools-0.9.1.tar.gz\
- > gbm_data_tools-0.9.1.tar.gz
-RUN $CONDAPFX/bin/conda create --name py3 -c conda-forge python=3.7 pip --yes &&\
+  https://fermi.gsfc.nasa.gov/ssc/data/analysis/gbm/gspec/gbm_data_tools-0.9.1.tar.gz > gbm_data_tools-0.9.1.tar.gz
+RUN $CONDABIN create --name py3 -c conda-forge python=3.7 pip --yes &&\
   $CONDAPFX/envs/py3/bin/pip install gbm_data_tools-0.9.1.tar.gz &&\
   rm gbm_data_tools-0.9.1.tar.gz
 
@@ -129,7 +159,7 @@ RUN cd /usr/local/bin &&\
 
 # Copy build products into a new Container / layer, specifically centos 6
 FROM centos:6
-MAINTAINER "Fermi LAT Collaboration"
+MAINTAINER "Fermi LAT Collaboration" "fermihelp@milkyway.gsfc.nasa.gov"
 
 # This is the default location of the shared directoy.
 VOLUME ["/data"]
@@ -203,11 +233,8 @@ RUN echo -e '%wheel        ALL=(ALL)       NOPASSWD: ALL\n\
 fermi        ALL=NOPASSWD: ALL\n\
 fermi ALL=NOPASSWD: /usr/bin/yum' >> /etc/sudoers
 
-# RUN echo "${ASTROPFX}/pgplot" >> /etc/ld.so.conf.d/pgplotlibs.conf
-# RUN echo "${ASTROPFX}/ftools/x86_64-pc-linux-gnu-libc2.12/lib" >> /etc/ld.so.conf.d/ftoollibs.conf
 RUN echo '/opt/anaconda/envs/fermi/lib' >> /etc/ld.so.conf.d/condalibs.conf
 RUN /opt/anaconda/bin/conda init bash
-# RUN sed -i '186 s/^/  : #/' ${ASTROPFX}/ftools/x86_64-pc-linux-gnu-libc2.12/BUILD_DIR/headas-setup
 RUN sed -i '135,157d' "/opt/anaconda/envs/fermi/etc/conda/activate.d/activate_fermitools.sh"
 
 

@@ -65,6 +65,7 @@ fi
 # Source everything that needs to be.
 /opt/anaconda/bin/conda init --all -q > /dev/null 2>&1
 # /opt/anaconda/bin/conda activate fermi
+. /opt/anaconda/bin/activate
 . $HEADAS/headas-init.sh
 chown -R fermi:fermi $HOME/pfiles
 
