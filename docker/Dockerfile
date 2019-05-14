@@ -94,7 +94,7 @@ RUN $CONDABIN create --name fermi -c conda-forge/label/cf201901 -c fermi/label/b
   astropy \
   fermipy \
   fermitools=1.0.5 \
-  fermitools-data \
+  fermitools-data=0.17 \
   jupyter \
   libpng \
   matplotlib \
