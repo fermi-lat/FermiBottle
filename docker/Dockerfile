@@ -90,10 +90,10 @@ ENV CONDABIN ${CONDAPFX}/bin/conda
 RUN curl -s -L https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh > anaconda.sh && bash anaconda.sh -b -p ${CONDAPFX}
 
 RUN $CONDABIN install --yes -c conda-forge/label/cf201901 gosu tini
-RUN $CONDABIN create --name fermi -c conda-forge/label/cf201901 -c fermi \
+RUN $CONDABIN create --name fermi -c conda-forge/label/cf201901 -c fermi/label/beta -c fermi \
   astropy \
   fermipy \
-  fermitools \
+  fermitools=1.0.5 \
   fermitools-data \
   jupyter \
   libpng \
