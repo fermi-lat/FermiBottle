@@ -98,6 +98,7 @@ RUN $CONDABIN create --name fermi -c conda-forge/label/cf201901 -c fermi/label/b
   jupyter \
   libpng \
   matplotlib \
+  naima \
   numpy \
   pmw \
   pyyaml \
