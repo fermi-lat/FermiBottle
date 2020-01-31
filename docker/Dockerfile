@@ -147,7 +147,7 @@ RUN sh setup_tempo2.sh && rm setup_tempo2.sh
 # DS9
 RUN mkdir $ASTROPFX/bin &&\
  cd $ASTROPFX/bin &&\
- curl http://ds9.si.edu/download/centos6/ds9.centos6.8.0.tar.gz | tar zxv
+ curl http://ds9.si.edu/download/centos6/ds9.centos6.8.1.tar.gz | tar zxv
 
 # RMFIT
 RUN cd /usr/local/bin &&\
