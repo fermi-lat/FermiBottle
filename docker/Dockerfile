@@ -80,9 +80,6 @@ cd .. && \
 rm -rf /heasoft-6.24 && \
 chmod -R g+rwx $FTOOLS
 
-# Add a timestamp for the build. Also, bust the cache.
-#ADD https://now.httpbin.org/when/now /opt/docker/etc/timestamp
-
 # Anaconda Fermitools, and other conda packages
 ENV CONDAPFX /opt/anaconda
 ENV CONDABIN ${CONDAPFX}/bin/conda
@@ -147,7 +144,7 @@ RUN sh setup_tempo2.sh && rm setup_tempo2.sh
 # DS9
 RUN mkdir $ASTROPFX/bin &&\
  cd $ASTROPFX/bin &&\
- curl http://ds9.si.edu/download/centos6/ds9.centos6.8.0.tar.gz | tar zxv
+ curl http://ds9.si.edu/download/centos6/ds9.centos6.8.1.tar.gz | tar zxv
 
 # RMFIT
 RUN cd /usr/local/bin &&\
