@@ -109,10 +109,10 @@ RUN chmod -R g+rwx /opt/anaconda
 # python 3 and gspec
 ########################
 RUN curl -s -L \
-  https://fermi.gsfc.nasa.gov/ssc/data/analysis/gbm/gspec/gbm_data_tools-0.9.1.tar.gz > gbm_data_tools-0.9.1.tar.gz
+  https://fermi.gsfc.nasa.gov/ssc/data/analysis/gbm/gspec/gspec-0.9.1.tar.gz > gspec-0.9.1.tar.gz
 RUN $CONDABIN create --name py3 -c conda-forge python=3.7 pip --yes &&\
-  $CONDAPFX/envs/py3/bin/pip install gbm_data_tools-0.9.1.tar.gz &&\
-  rm gbm_data_tools-0.9.1.tar.gz
+  $CONDAPFX/envs/py3/bin/pip install gspec-0.9.1.tar.gz &&\
+  rm gspec-0.9.1.tar.gz
 
 # Fermitools prefix
 ENV FERMIPFX $CONDAPFX/envs/fermi
