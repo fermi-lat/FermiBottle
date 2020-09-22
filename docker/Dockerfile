@@ -84,14 +84,13 @@ chmod -R g+rwx $FTOOLS
 ENV CONDAPFX /opt/anaconda
 ENV CONDABIN ${CONDAPFX}/bin/conda
 
-RUN curl -s -L https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh > anaconda.sh && bash anaconda.sh -b -p ${CONDAPFX}
+RUN curl -s -L https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh > anaconda.sh && bash anaconda.sh -b -p ${CONDAPFX}
 
-RUN $CONDABIN install --yes -c conda-forge/label/cf201901 gosu tini
-RUN $CONDABIN create --name fermi -c conda-forge/label/cf201901 -c fermi/label/beta -c fermi \
+RUN $CONDABIN install --yes -c conda-forge gosu tini
+RUN $CONDABIN create --name fermi -c conda-forge -c fermi \
   astropy \
   fermipy \
-  fermitools=1.0.5 \
-  fermitools-data=0.17 \
+  fermitools \
   jupyter \
   libpng \
   matplotlib \
