@@ -14,10 +14,10 @@
 #                             Start Builder
 ##########################################################################
 
-# Use Centos 6 as our base. Name the builder container builder.
+# Use Centos 7 as our base. Name the builder container builder.
 # This container will be thrown away once its contents are copied
-# into another centos:6 container at the end of the script.
-FROM centos:6 as builder
+# into another centos:7 container at the end of the script.
+FROM centos:7 as builder
 
 # Install necessary dev packages from YUM, in alphabetical order
 RUN yum update -y && \
@@ -84,14 +84,14 @@ chmod -R g+rwx $FTOOLS
 ENV CONDAPFX /opt/anaconda
 ENV CONDABIN ${CONDAPFX}/bin/conda
 
-RUN curl -s -L https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh > anaconda.sh && bash anaconda.sh -b -p ${CONDAPFX}
+RUN curl -s -L https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh > anaconda.sh && bash anaconda.sh -b -p ${CONDAPFX}
 
-RUN $CONDABIN install --yes -c conda-forge/label/cf201901 gosu tini
-RUN $CONDABIN create --name fermi -c conda-forge/label/cf201901 -c fermi/label/beta -c fermi \
+RUN $CONDABIN install --yes -c conda-forge  gosu tini
+RUN $CONDABIN create --name fermi -c conda-forge -c fermi \
   astropy \
   fermipy \
-  fermitools=1.0.5 \
-  fermitools-data=0.17 \
+  fermitools=2.0 \
+  fermitools-data=0.18 \
   jupyter \
   libpng \
   matplotlib \
@@ -101,18 +101,18 @@ RUN $CONDABIN create --name fermi -c conda-forge/label/cf201901 -c fermi/label/b
   pyyaml \
   scipy \
   --yes
-RUN $CONDAPFX/bin/pip install pyds9 pysqlite
+RUN $CONDAPFX/bin/pip install pyds9
 RUN rm -rf ${CONDAPFX}/pkgs/*
 RUN chmod -R g+rwx /opt/anaconda
 
 ########################
-# python 3 and gspec
+# 
 ########################
 RUN curl -s -L \
-  https://fermi.gsfc.nasa.gov/ssc/data/analysis/gbm/gspec/gbm_data_tools-0.9.1.tar.gz > gbm_data_tools-0.9.1.tar.gz
-RUN $CONDABIN create --name py3 -c conda-forge python=3.7 pip --yes &&\
-  $CONDAPFX/envs/py3/bin/pip install gbm_data_tools-0.9.1.tar.gz &&\
-  rm gbm_data_tools-0.9.1.tar.gz
+  https://fermi.gsfc.nasa.gov/ssc/data/analysis/gbm/gspec/gspec-0.9.1.tar.gz > gspec-0.9.1.tar.gz
+RUN $CONDABIN create --name gbm -c conda-forge pip --yes &&\
+  $CONDAPFX/envs/gbm/bin/pip3 install gspec-0.9.1.tar.gz &&\
+  rm gspec-0.9.1.tar.gz
 
 # Fermitools prefix
 ENV FERMIPFX $CONDAPFX/envs/fermi
@@ -144,19 +144,18 @@ RUN sh setup_tempo2.sh && rm setup_tempo2.sh
 # DS9
 RUN mkdir $ASTROPFX/bin &&\
  cd $ASTROPFX/bin &&\
- curl http://ds9.si.edu/download/centos6/ds9.centos6.8.1.tar.gz | tar zxv
+ curl http://ds9.si.edu/download/centos7/ds9.centos7.8.1.tar.gz | tar zxv
 
 # RMFIT
 RUN cd /usr/local/bin &&\
  curl https://fermi.gsfc.nasa.gov/ssc/data/analysis/rmfit/rmfit_v432_64bit.tar.gz | tar zxv
 
-
 ##########################################################################
 #                     End Builder, Start final Product
 ##########################################################################
 
-# Copy build products into a new Container / layer, specifically centos 6
-FROM centos:6
+# Copy build products into a new Container / layer, specifically centos 7
+FROM centos:7
 MAINTAINER "Fermi LAT Collaboration" "fermihelp@milkyway.gsfc.nasa.gov"
 
 # This is the default location of the shared directoy.
