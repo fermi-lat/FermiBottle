@@ -89,9 +89,10 @@ RUN curl -s -L https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_6
 RUN $CONDABIN install --yes -c conda-forge  gosu tini
 RUN $CONDABIN create --name fermi -c conda-forge -c fermi \
   astropy \
-  fermipy \
+  fermipy=1.0.0 \
   fermitools=2.0 \
   fermitools-data=0.18 \
+  gammapy \
   jupyter \
   libpng \
   matplotlib \
