@@ -5,8 +5,8 @@ bash anaconda.sh -b -p ${CONDAPFX}
 rm anaconda.sh
 # echo "export PATH=${CONDAPFX}/bin:$PATH" >> ${HOME}/.bashrc
 export PATH=${CONDAPFX}/bin:$PATH
-conda install --yes -c conda-forge gosu tini
-conda create --name fermi -c conda-forge -c fermi \
+conda install --yes -c conda-forge gosu tini mamba
+mamba create --name fermi -c conda-forge -c fermi \
   astropy \
   fermipy \
   fermitools \

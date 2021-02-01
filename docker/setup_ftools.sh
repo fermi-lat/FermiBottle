@@ -10,5 +10,5 @@ mkdir -p $FTOOLS
   --with-components="heacore tcltk attitude heatools Xspec ftools "
 ./hmake && ./hmake install
 cd ..
-rm -rf /heasoft-6.23
+rm -rf /heasoft-6.24
 chmod -R g+rwx $FTOOLS
