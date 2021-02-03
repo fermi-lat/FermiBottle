@@ -67,15 +67,15 @@ RUN mkdir -p $ASTROPFX
 # before we can execute it, which is unfortunate.
 # COPY setup_ftools.sh $HOME/setup_ftools.sh
 # RUN sh setup_ftools.sh && rm setup_ftools.sh
-RUN curl -s -L https://heasarc.gsfc.nasa.gov/FTP/software/lheasoft/lheasoft6.24/heasoft-6.24src_no_xspec_modeldata.tar.gz | tar zxv -o heasoft-6.24
-WORKDIR heasoft-6.24/BUILD_DIR
-RUN FTOOLS=$ASTROPFX/ftools && \
+RUN curl -s -L https://heasarc.gsfc.nasa.gov/FTP/software/lheasoft/lheasoft6.24/heasoft-6.24src_no_xspec_modeldata.tar.gz | tar zxv -o heasoft-6.24 &&\
+cd heasoft-6.24/BUILD_DIR &&\
+FTOOLS=$ASTROPFX/ftools && \
 mkdir -p $FTOOLS && \
 ./configure --prefix=$FTOOLS CFLAGS=-fpic --enable-collapse \
   --with-components="heacore tcltk attitude heatools Xspec ftools " && \
-./hmake && ./hmake install
-WORKDIR ..
-RUN chmod -R g+rwx $ASTROPFX/ftools
+./hmake && ./hmake install &&\
+cd .. &&\
+chmod -R g+rwx $ASTROPFX/ftools
 
 # Anaconda Fermitools, and other conda packages
 ENV CONDAPFX /opt/anaconda
@@ -87,6 +87,9 @@ RUN curl -s -L https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_6
 RUN $CONDABIN install --yes -c conda-forge mamba gosu tini
 RUN $MAMBA create --name fermi -c conda-forge -c fermi \
   astropy \
+  fermipy=1.0.0 \
+  fermitools=2.0.8 \
+  fermitools-data \
   gammapy \
   jupyter \
   libpng \
@@ -97,11 +100,6 @@ RUN $MAMBA create --name fermi -c conda-forge -c fermi \
   python=3.7.* \
   pyyaml \
   scipy \
-  --yes
-RUN $CONDABIN install --name fermi -c conda-forge -c fermi \
-  fermitools=2.0.8 \
-  fermipy=1.0.0 \
-  fermitools-data \
   --yes
 RUN $CONDAPFX/bin/pip install pyds9
 RUN rm -rf ${CONDAPFX}/pkgs/*
