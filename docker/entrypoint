@@ -32,8 +32,9 @@ ln -s /opt/anaconda/bin/conda /home/fermi/astrosoft/bin/conda
 /opt/anaconda/bin/conda config --add channels conda-forge
 /opt/anaconda/bin/conda config --add channels fermi
 chown fermi:fermi $HOME/.condarc
+chown fermi:fermi $HOME/.config
 chown fermi:fermi $HOME/astrosoft
-chown fermi:fermi $HOME
+chown -R fermi:fermi $HOME
 cd $HOME
 
 if [ ! .bash_profile -nt /.fermibottle ]; then
@@ -69,6 +70,7 @@ fi
 # . /opt/anaconda/bin/activate base
 . $HEADAS/headas-init.sh
 chown -R fermi:fermi $HOME/pfiles
+chown -R fermi:fermi $HOME
 
 
 # Run whatever the user wants.
