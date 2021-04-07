@@ -67,8 +67,8 @@ RUN mkdir -p $ASTROPFX
 # before we can execute it, which is unfortunate.
 # COPY setup_ftools.sh $HOME/setup_ftools.sh
 # RUN sh setup_ftools.sh && rm setup_ftools.sh
-RUN curl -s -L https://heasarc.gsfc.nasa.gov/FTP/software/lheasoft/lheasoft6.24/heasoft-6.24src_no_xspec_modeldata.tar.gz | tar zxv -o heasoft-6.24 &&\
-cd heasoft-6.24/BUILD_DIR &&\
+RUN curl -s -L https://heasarc.gsfc.nasa.gov/FTP/software/lheasoft/lheasoft6.26/heasoft-6.26src_no_xspec_modeldata.tar.gz | tar zxv -o heasoft-6.26 &&\
+cd heasoft-6.26/BUILD_DIR &&\
 FTOOLS=$ASTROPFX/ftools && \
 mkdir -p $FTOOLS && \
 ./configure --prefix=$FTOOLS CFLAGS=-fpic --enable-collapse \
@@ -101,7 +101,7 @@ RUN $MAMBA create --name fermi -c conda-forge -c fermi \
   pyyaml \
   scipy \
   --yes
-RUN $CONDAPFX/bin/pip install pyds9
+RUN $CONDAPFX/envs/fermi/bin/pip install pyds9
 RUN rm -rf ${CONDAPFX}/pkgs/*
 RUN chmod -R g+rwx /opt/anaconda
 
@@ -144,7 +144,7 @@ RUN sh setup_tempo2.sh && rm setup_tempo2.sh
 # DS9
 RUN mkdir $ASTROPFX/bin &&\
  cd $ASTROPFX/bin &&\
- curl http://ds9.si.edu/download/centos7/ds9.centos7.8.1.tar.gz | tar zxv
+ curl http://ds9.si.edu/download/centos7/ds9.centos7.8.2.1.tar.gz | tar zxv
 
 # RMFIT
 RUN cd /usr/local/bin &&\
