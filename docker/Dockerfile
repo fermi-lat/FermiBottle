@@ -85,7 +85,8 @@ ENV MAMBA ${CONDAPFX}/bin/mamba
 RUN curl -s -L https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh > anaconda.sh && bash anaconda.sh -b -p ${CONDAPFX}
 
 RUN $CONDABIN install --yes -c conda-forge mamba gosu tini
-RUN $MAMBA create --name fermi -c conda-forge -c fermi \
+RUN $MAMBA create --name fermi -c conda-forge -c fermi -c threeml \
+  astromodels \
   astropy \
   fermipy=1.0.0 \
   fermitools=2.0.8 \
@@ -96,22 +97,29 @@ RUN $MAMBA create --name fermi -c conda-forge -c fermi \
   matplotlib \
   naima \
   numpy \
+  pint-pulsar \
   pmw \
   python=3.7.* \
   pyyaml \
   scipy \
+  threeml \
   --yes
 RUN $CONDAPFX/envs/fermi/bin/pip install pyds9
 RUN rm -rf ${CONDAPFX}/pkgs/*
 RUN chmod -R g+rwx /opt/anaconda
 
 ########################
-# 
+# GBM Data Tools
 ########################
 RUN curl -s -L \
+  https://fermi.gsfc.nasa.gov/ssc/data/analysis/gbm/gbm_data_tools/gbm_data_tools-1.0.4.tar.gz > gbm_data_tools-1.0.4.tar.gz
+RUN GEOS_DIR=/envs/fermi/lib  $CONDAPFX/envs/fermi/bin/pip3 install gbm_data_tools-1.0.4.tar.gz &&\
+  rm gbm_data_tools-1.0.4.tar.gz
+
+RUN curl -s -L \
   https://fermi.gsfc.nasa.gov/ssc/data/analysis/gbm/gspec/gspec-0.9.1.tar.gz > gspec-0.9.1.tar.gz
-RUN $CONDABIN create --name gbm -c conda-forge pip --yes &&\
-  $CONDAPFX/envs/gbm/bin/pip3 install gspec-0.9.1.tar.gz &&\
+RUN $CONDABIN create --name gspec -c conda-forge pip --yes &&\
+  $CONDAPFX/envs/gspec/bin/pip3 install gspec-0.9.1.tar.gz &&\
   rm gspec-0.9.1.tar.gz
 
 # Fermitools prefix
@@ -142,13 +150,12 @@ COPY setup_tempo2.sh $HOME/setup_tempo2.sh
 RUN sh setup_tempo2.sh && rm setup_tempo2.sh
 
 # DS9
-RUN mkdir $ASTROPFX/bin &&\
- cd $ASTROPFX/bin &&\
- curl http://ds9.si.edu/download/centos7/ds9.centos7.8.2.1.tar.gz | tar zxv
+RUN mkdir $ASTROPFX/bin
+COPY ds9 $ASTROPFX/bin/ds9
+# RUN mkdir $ASTROPFX/bin &&\
+#  cd $ASTROPFX/bin &&\
+#  curl http://ds9.si.edu/download/centos7/ds9.centos7.8.2.1.tar.gz | tar zxv
 
-# RMFIT
-RUN cd /usr/local/bin &&\
- curl https://fermi.gsfc.nasa.gov/ssc/data/analysis/rmfit/rmfit_v432_64bit.tar.gz | tar zxv
 
 ##########################################################################
 #                     End Builder, Start final Product
@@ -178,7 +185,7 @@ COPY --from=builder --chown=root:wheel $ASTROPFX/tempo $ASTROPFX/tempo
 COPY --from=builder --chown=root:wheel $ASTROPFX/pgplot $ASTROPFX/pgplot
 COPY --from=builder --chown=root:wheel $ASTROPFX/tempo2 $ASTROPFX/tempo2
 COPY --from=builder --chown=root:wheel $ASTROPFX/bin $ASTROPFX/bin
-COPY --from=builder --chown=root:wheel /usr/local/bin/rmfit_v432 /usr/local/bin/rmfit_v432
+COPY --from=builder --chown=root:wheel /root/.gbm_data_tools $ASTROPFX/.gbm_data_tools
 
 # Now install a bunch of Yum packages, not the devel versions.
 RUN sed -i '/tsflags=nodocs/d' /etc/yum.conf && \
@@ -214,6 +221,7 @@ yum install -y \
   sqlite \
   sudo \
   tar \
+  time \
   vim \
   vim-X11 \
   wget \
