@@ -18,7 +18,7 @@ The FermiBottle includes the following high level packages for high energy astro
 | [3ML](https://github.com/threeml/threeML)                            | 2.2.1     | fermi             | Framework for multi-wavelength/multi-messenger analysis for astronomy/astrophysics|
 | [Gammpy](https://gammapy.org/)                                       | 0.18.2    | fermi             | Python package for gamma-ray astronomy |
 | [GSpec](https://fermi.gsfc.nasa.gov/ssc/data/analysis/gbm/)          | 0.9.1     | gspec             | GBM data analysis via a user-interactive GUI |
-| [GBM Data Tools](https://fermi.gsfc.nasa.gov/ssc/data/analysis/gbm/) | 1.0.4     | fermi             | High-level API layer allowing a user to read, reduce, and visualize GBM data|
+| [GBM Data Tools](https://fermi.gsfc.nasa.gov/ssc/data/analysis/gbm/) | 1.1.0     | fermi             | High-level API layer allowing a user to read, reduce, and visualize GBM data|
 | [PRESTO](https://github.com/scottransom/presto)                      | 4.0       | -                 | Large suite of pulsar search and analysis software|
 | [TEMPO](http://tempo.sourceforge.net/)                               | 13.1      | -                 | Pulsar timing data analysis|
 | [TEMPO2](https://www.atnf.csiro.au/research/pulsar/tempo2/)          | 2018.02.1 | -                 | Software package for pulsar timing|
