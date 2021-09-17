@@ -88,7 +88,8 @@ RUN $CONDABIN install --yes -c conda-forge mamba gosu tini
 RUN $MAMBA create --name fermi -c conda-forge -c fermi -c threeml \
   astromodels \
   astropy \
-  fermipy=1.0.0 \
+  clhep=2.4.4.1 \
+  fermipy=1.0.1 \
   fermitools=2.0.8 \
   fermitools-data \
   gammapy \
@@ -111,10 +112,12 @@ RUN chmod -R g+rwx /opt/anaconda
 ########################
 # GBM Data Tools
 ########################
+  # https://fermi.gsfc.nasa.gov/ssc/data/analysis/gbm/gbm_data_tools/gbm_data_tools-1.0.4.tar.gz > gbm_data_tools-1.0.4.tar.gz
 RUN curl -s -L \
-  https://fermi.gsfc.nasa.gov/ssc/data/analysis/gbm/gbm_data_tools/gbm_data_tools-1.0.4.tar.gz > gbm_data_tools-1.0.4.tar.gz
-RUN GEOS_DIR=/envs/fermi/lib  $CONDAPFX/envs/fermi/bin/pip3 install gbm_data_tools-1.0.4.tar.gz &&\
-  rm gbm_data_tools-1.0.4.tar.gz
+  https://fermi.gsfc.nasa.gov/ssc/data/analysis/gbm/gbm_data_tools/gbm_data_tools-1.1.0.tar.gz > gbm_data_tools-1.1.0.tar.gz
+  # https://www.dropbox.com/s/i3jhkjmg04a7rts/gbm_data_tools-1.1.0.tar.gz > gbm_data_tools-1.1.0.tar.gz
+RUN GEOS_DIR=/envs/fermi/lib  $CONDAPFX/envs/fermi/bin/pip3 install gbm_data_tools-1.1.0.tar.gz &&\
+  rm gbm_data_tools-1.1.0.tar.gz
 
 RUN curl -s -L \
   https://fermi.gsfc.nasa.gov/ssc/data/analysis/gbm/gspec/gspec-0.9.1.tar.gz > gspec-0.9.1.tar.gz
