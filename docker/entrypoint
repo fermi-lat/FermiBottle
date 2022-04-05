@@ -78,4 +78,4 @@ chown -R fermi:fermi $HOME
 
 # Run whatever the user wants.
 echo "Welcome to the Fermi Container."
-exec /opt/anaconda/bin/gosu fermi "$@"
+exec /opt/anaconda/bin/su-exec fermi "$@"

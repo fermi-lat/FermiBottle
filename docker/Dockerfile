@@ -14,14 +14,18 @@
 #                             Start Builder
 ##########################################################################
 
-# Use Centos 7 as our base. Name the builder container builder.
+# Use Centos 8 as our base. Name the builder container builder.
 # This container will be thrown away once its contents are copied
-# into another centos:7 container at the end of the script.
-FROM centos:7 as builder
+# into another centos:8 container at the end of the script.
+FROM centos:8 as builder
 
 # Install necessary dev packages from YUM, in alphabetical order
-RUN yum update -y && \
-yum install -y \
+RUN cd /etc/yum.repos.d/
+RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+RUN sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+
+RUN yum update -y
+RUN yum install -y --enablerepo=powertools \
   autoconf \
   automake \
   bzip2-devel \
@@ -82,9 +86,9 @@ ENV CONDAPFX /opt/anaconda
 ENV CONDABIN ${CONDAPFX}/bin/conda
 ENV MAMBA ${CONDAPFX}/bin/mamba
 
-RUN curl -s -L https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh > anaconda.sh && bash anaconda.sh -b -p ${CONDAPFX}
+RUN curl -s -L https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-aarch64.sh > anaconda.sh && bash anaconda.sh -b -p ${CONDAPFX}
 
-RUN $CONDABIN install --yes -c conda-forge mamba gosu tini
+RUN $CONDABIN install --channel conda-forge --yes mamba su-exec tini
 RUN $MAMBA create --name fermi -c conda-forge -c fermi -c threeml \
   astromodels \
   astropy \
@@ -164,8 +168,8 @@ COPY ds9 $ASTROPFX/bin/ds9
 #                     End Builder, Start final Product
 ##########################################################################
 
-# Copy build products into a new Container / layer, specifically centos 7
-FROM centos:7
+# Copy build products into a new Container / layer, specifically centos 8
+FROM centos:8
 MAINTAINER "Fermi LAT Collaboration" "fermihelp@milkyway.gsfc.nasa.gov"
 
 # This is the default location of the shared directoy.
