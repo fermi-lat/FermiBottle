@@ -201,9 +201,12 @@ COPY --from=builder --chown=root:wheel $ASTROPFX/bin $ASTROPFX/bin
 COPY --from=builder --chown=root:wheel /root/.gbm_data_tools $ASTROPFX/.gbm_data_tools
 
 # Now install a bunch of Yum packages, not the devel versions.
+RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+RUN sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+RUN yum update -y
 RUN sed -i '/tsflags=nodocs/d' /etc/yum.conf && \
 yum update -y && \
-yum install -y \
+yum install -y --enablerepo=powertools \
   bzip2 \
   dejavu-lgc-sans-fonts \
   emacs \
