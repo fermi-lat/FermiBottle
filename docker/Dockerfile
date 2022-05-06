@@ -81,7 +81,7 @@ mkdir -p $FTOOLS && \
 ./configure --prefix=$FTOOLS CFLAGS=-fpic --enable-collapse \
   --with-components="heacore tcltk attitude heatools Xspec ftools " && \
 ./hmake -j4 && ./hmake install &&\
-cd ../../ &&\
+cd ../ &&\
 chmod -R g+rwx $ASTROPFX/ftools
 
 # Tempo
