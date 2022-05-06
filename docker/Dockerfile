@@ -132,7 +132,7 @@ RUN sh setup_mambaforge.sh && rm setup_mambaforge.sh
 
 RUN $CONDABIN install --channel conda-forge --yes mamba su-exec tini
 RUN $MAMBA create --name fermi -c conda-forge -c threeml -c fermi -c fermi/label/dev \
-  fermitools=2.1.4 \
+  fermitools=2.1.13 \
   gammapy \
   healpy \
   jupyter \
