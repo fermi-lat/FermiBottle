@@ -125,10 +125,10 @@ ENV CONDAPFX /opt/anaconda
 ENV CONDABIN ${CONDAPFX}/bin/conda
 ENV MAMBA ${CONDAPFX}/bin/mamba
 
-RUN curl -s -L https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-aarch64.sh > anaconda.sh && bash anaconda.sh -b -p ${CONDAPFX}
-
-# COPY setup_mambaforge.sh ${HOME}/setup_mambaforge.sh
-# RUN sh ${HOME}/setup_mambaforge.sh
+# RUN curl -s -L https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-aarch64.sh > anaconda.sh && bash anaconda.sh -b -p ${CONDAPFX}
+#
+COPY setup_mambaforge.sh $HOME/setup_mambaforge.sh
+RUN sh setup_mambaforge.sh && rm setup_mambaforge.sh
 
 RUN $CONDABIN install --channel conda-forge --yes mamba su-exec tini
 RUN $MAMBA create --name fermi -c conda-forge -c threeml -c fermi -c fermi/label/dev \
