@@ -74,15 +74,15 @@ RUN mkdir -p $ASTROPFX
 # before we can execute it, which is unfortunate.
 COPY setup_ftools.sh $HOME/setup_ftools.sh
 RUN sh setup_ftools.sh && rm setup_ftools.sh
-RUN curl -s -L https://heasarc.gsfc.nasa.gov/FTP/software/lheasoft/lheasoft6.30.1/heasoft-6.30.1src_no_xspec_modeldata.tar.gz | tar zxv -o heasoft-6.30.1
-RUN cd heasoft-6.30.1/BUILD_DIR &&\
-FTOOLS=$ASTROPFX/ftools && \
-mkdir -p $FTOOLS && \
-./configure --prefix=$FTOOLS CFLAGS=-fpic --enable-collapse \
-  --with-components="heacore tcltk attitude heatools Xspec ftools " && \
-./hmake -j4 && ./hmake install &&\
-cd ../ &&\
-chmod -R g+rwx $ASTROPFX/ftools
+# RUN curl -s -L https://heasarc.gsfc.nasa.gov/FTP/software/lheasoft/lheasoft6.30.1/heasoft-6.30.1src_no_xspec_modeldata.tar.gz | tar zxv -o heasoft-6.30.1
+# RUN cd heasoft-6.30.1/BUILD_DIR &&\
+# FTOOLS=$ASTROPFX/ftools && \
+# mkdir -p $FTOOLS
+# RUN ./configure --prefix=$FTOOLS CFLAGS=-fpic --enable-collapse \
+#   --with-components="heacore tcltk attitude heatools Xspec ftools "
+# RUN ./hmake -j4
+# RUN ./hmake install
+# RUN chmod -R g+rwx $ASTROPFX/ftools
 
 # Tempo
 COPY setup_tempo.sh $HOME/setup_tempo.sh
