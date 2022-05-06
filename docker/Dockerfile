@@ -23,8 +23,11 @@ FROM centos:8 as builder
 RUN cd /etc/yum.repos.d/
 RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
 RUN sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
-
 RUN yum update -y
+# RUN yum install -y centos-release-scl
+# RUN yum install -y devtoolset-7-gcc*
+# RUN yum update -y
+# RUN yum install -y \
 RUN yum install -y --enablerepo=powertools \
   autoconf \
   automake \
@@ -69,68 +72,17 @@ RUN mkdir -p $ASTROPFX
 # Install Heasarc Ftools from nifty script. Note, we
 # must first copy the install script into the container
 # before we can execute it, which is unfortunate.
-# COPY setup_ftools.sh $HOME/setup_ftools.sh
-# RUN sh setup_ftools.sh && rm setup_ftools.sh
-RUN curl -s -L https://heasarc.gsfc.nasa.gov/FTP/software/lheasoft/lheasoft6.26/heasoft-6.26src_no_xspec_modeldata.tar.gz | tar zxv -o heasoft-6.26 &&\
-cd heasoft-6.26/BUILD_DIR &&\
+COPY setup_ftools.sh $HOME/setup_ftools.sh
+RUN sh setup_ftools.sh && rm setup_ftools.sh
+RUN curl -s -L https://heasarc.gsfc.nasa.gov/FTP/software/lheasoft/lheasoft6.30.1/heasoft-6.30.1src_no_xspec_modeldata.tar.gz | tar zxv -o heasoft-6.30.1
+RUN cd heasoft-6.31.1/BUILD_DIR &&\
 FTOOLS=$ASTROPFX/ftools && \
 mkdir -p $FTOOLS && \
 ./configure --prefix=$FTOOLS CFLAGS=-fpic --enable-collapse \
   --with-components="heacore tcltk attitude heatools Xspec ftools " && \
-./hmake && ./hmake install &&\
+./hmake -j4 && ./hmake install &&\
 cd .. &&\
 chmod -R g+rwx $ASTROPFX/ftools
-
-# Anaconda Fermitools, and other conda packages
-ENV CONDAPFX /opt/anaconda
-ENV CONDABIN ${CONDAPFX}/bin/conda
-ENV MAMBA ${CONDAPFX}/bin/mamba
-
-RUN curl -s -L https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-aarch64.sh > anaconda.sh && bash anaconda.sh -b -p ${CONDAPFX}
-
-RUN $CONDABIN install --channel conda-forge --yes mamba su-exec tini
-RUN $MAMBA create --name fermi -c conda-forge -c fermi -c threeml \
-  astromodels \
-  astropy \
-  clhep=2.4.4.1 \
-  fermipy=1.0.1 \
-  fermitools=2.0.8 \
-  fermitools-data \
-  gammapy \
-  jupyter \
-  libpng \
-  matplotlib \
-  naima \
-  numpy \
-  pint-pulsar \
-  pmw \
-  python=3.7.* \
-  pyyaml \
-  scipy \
-  threeml \
-  --yes
-RUN $CONDAPFX/envs/fermi/bin/pip install pyds9
-RUN rm -rf ${CONDAPFX}/pkgs/*
-RUN chmod -R g+rwx /opt/anaconda
-
-########################
-# GBM Data Tools
-########################
-  # https://fermi.gsfc.nasa.gov/ssc/data/analysis/gbm/gbm_data_tools/gbm_data_tools-1.0.4.tar.gz > gbm_data_tools-1.0.4.tar.gz
-RUN curl -s -L \
-  https://fermi.gsfc.nasa.gov/ssc/data/analysis/gbm/gbm_data_tools/gbm_data_tools-1.1.0.tar.gz > gbm_data_tools-1.1.0.tar.gz
-  # https://www.dropbox.com/s/i3jhkjmg04a7rts/gbm_data_tools-1.1.0.tar.gz > gbm_data_tools-1.1.0.tar.gz
-RUN GEOS_DIR=/envs/fermi/lib  $CONDAPFX/envs/fermi/bin/pip3 install gbm_data_tools-1.1.0.tar.gz &&\
-  rm gbm_data_tools-1.1.0.tar.gz
-
-RUN curl -s -L \
-  https://fermi.gsfc.nasa.gov/ssc/data/analysis/gbm/gspec/gspec-0.9.1.tar.gz > gspec-0.9.1.tar.gz
-RUN $CONDABIN create --name gspec -c conda-forge pip --yes &&\
-  $CONDAPFX/envs/gspec/bin/pip3 install gspec-0.9.1.tar.gz &&\
-  rm gspec-0.9.1.tar.gz
-
-# Fermitools prefix
-ENV FERMIPFX $CONDAPFX/envs/fermi
 
 # Tempo
 COPY setup_tempo.sh $HOME/setup_tempo.sh
@@ -162,6 +114,60 @@ COPY ds9 $ASTROPFX/bin/ds9
 # RUN mkdir $ASTROPFX/bin &&\
 #  cd $ASTROPFX/bin &&\
 #  curl http://ds9.si.edu/download/centos7/ds9.centos7.8.2.1.tar.gz | tar zxv
+
+# Anaconda Fermitools, and other conda packages
+ENV CONDAPFX /opt/anaconda
+ENV CONDABIN ${CONDAPFX}/bin/conda
+ENV MAMBA ${CONDAPFX}/bin/mamba
+
+# Anaconda Fermitools, and other conda packages
+ENV CONDAPFX /opt/anaconda
+ENV CONDABIN ${CONDAPFX}/bin/conda
+ENV MAMBA ${CONDAPFX}/bin/mamba
+
+RUN curl -s -L https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-aarch64.sh > anaconda.sh && bash anaconda.sh -b -p ${CONDAPFX}
+
+# COPY setup_mambaforge.sh ${HOME}/setup_mambaforge.sh
+# RUN sh ${HOME}/setup_mambaforge.sh
+
+RUN $CONDABIN install --channel conda-forge --yes mamba su-exec tini
+RUN $MAMBA create --name fermi -c conda-forge -c threeml -c fermi -c fermi/label/dev \
+  fermitools=2.1.4 \
+  gammapy \
+  healpy \
+  jupyter \
+  numpy \
+  scipy \
+  libpng \
+  --yes
+
+  # pint-pulsar \
+  # fermipy=1.0.1 \
+  # naima \
+  # astromodels \
+  # threeml \
+RUN $CONDAPFX/envs/fermi/bin/pip install pyds9
+RUN rm -rf ${CONDAPFX}/pkgs/*
+RUN chmod -R g+rwx ${CONDAPFX}
+
+########################
+# GBM Data Tools
+########################
+  # https://fermi.gsfc.nasa.gov/ssc/data/analysis/gbm/gbm_data_tools/gbm_data_tools-1.0.4.tar.gz > gbm_data_tools-1.0.4.tar.gz
+RUN curl -s -L \
+  https://fermi.gsfc.nasa.gov/ssc/data/analysis/gbm/gbm_data_tools/gbm_data_tools-1.1.0.tar.gz > gbm_data_tools-1.1.0.tar.gz
+  # https://www.dropbox.com/s/i3jhkjmg04a7rts/gbm_data_tools-1.1.0.tar.gz > gbm_data_tools-1.1.0.tar.gz
+RUN GEOS_DIR=/envs/fermi/lib  $CONDAPFX/envs/fermi/bin/pip3 install gbm_data_tools-1.1.0.tar.gz &&\
+  rm gbm_data_tools-1.1.0.tar.gz
+
+RUN curl -s -L \
+  https://fermi.gsfc.nasa.gov/ssc/data/analysis/gbm/gspec/gspec-0.9.1.tar.gz > gspec-0.9.1.tar.gz
+RUN $CONDABIN create --name gspec -c conda-forge pip --yes &&\
+  $CONDAPFX/envs/gspec/bin/pip3 install gspec-0.9.1.tar.gz &&\
+  rm gspec-0.9.1.tar.gz
+
+# Fermitools prefix
+ENV FERMIPFX $CONDAPFX/envs/fermi
 
 
 ##########################################################################
