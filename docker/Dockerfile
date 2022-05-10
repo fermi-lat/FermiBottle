@@ -132,7 +132,7 @@ RUN sh setup_mambaforge.sh && rm setup_mambaforge.sh
 
 RUN $CONDABIN install --channel conda-forge --yes mamba su-exec tini
 RUN $MAMBA create --name fermi -c conda-forge -c threeml -c fermi -c fermi/label/dev \
-  fermitools=2.1.13 \
+  fermitools=2.1.16 \
   gammapy \
   healpy \
   jupyter \
@@ -162,7 +162,7 @@ RUN GEOS_DIR=/envs/fermi/lib  $CONDAPFX/envs/fermi/bin/pip3 install gbm_data_too
 
 RUN curl -s -L \
   https://fermi.gsfc.nasa.gov/ssc/data/analysis/gbm/gspec/gspec-0.9.1.tar.gz > gspec-0.9.1.tar.gz
-RUN $CONDABIN create --name gspec -c conda-forge pip --yes &&\
+RUN $CONDABIN create --name gspec -c conda-forge astropy pip --yes &&\
   $CONDAPFX/envs/gspec/bin/pip3 install gspec-0.9.1.tar.gz &&\
   rm gspec-0.9.1.tar.gz
 

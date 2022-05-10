@@ -8,7 +8,7 @@ FTOOLS=$ASTROPFX/ftools
 mkdir -p $FTOOLS
 ./configure --prefix=$FTOOLS CFLAGS=-fpic --enable-collapse \
   --with-components="heacore tcltk attitude heatools Xspec ftools "
-./hmake -j 4&& ./hmake install
+./hmake -j 4 && ./hmake install
 cd ..
 rm -rf /heasoft-6.30.1
 chmod -R g+rwx $FTOOLS
