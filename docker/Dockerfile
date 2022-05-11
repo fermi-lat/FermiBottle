@@ -130,23 +130,33 @@ ENV MAMBA ${CONDAPFX}/bin/mamba
 COPY setup_mambaforge.sh $HOME/setup_mambaforge.sh
 RUN sh setup_mambaforge.sh && rm setup_mambaforge.sh
 
-RUN $CONDABIN install --channel conda-forge --yes mamba su-exec tini
+RUN $CONDABIN install --channel conda-forge --yes mamba su-exec setuptools tini
 RUN $MAMBA create --name fermi -c conda-forge -c threeml -c fermi -c fermi/label/dev \
-  fermitools=2.1.16 \
+  fermitools=2.1.19 \
+  fermitools-data \
   gammapy \
   healpy \
   jupyter \
+  libpng \
   numpy \
   scipy \
-  libpng \
   --yes
+
+RUN export CONDA_PREFIX=${CONDAPFX}/envs/fermi && \
+    source ${CONDAPFX}/envs/fermi/etc/conda/activate.d/activate_fermitools.sh && \
+    echo $FERMI_DIR $FERMI_INST_DIR $INST_DIR && \
+    git clone --depth 1 --branch v1.1 https://github.com/fermiPy/fermipy.git && \
+    cd fermipy && ${CONDAPFX}/envs/fermi/bin/pip3 install . -vv && cd ../ && \
+    rm -rf fermipy && \
+    source ${CONDAPFX}/envs/fermi/etc/conda/deactivate.d/deactivate_fermitools.sh
 
   # pint-pulsar \
   # fermipy=1.0.1 \
   # naima \
   # astromodels \
   # threeml \
-RUN $CONDAPFX/envs/fermi/bin/pip install pyds9
+
+RUN $CONDAPFX/envs/fermi/bin/pip3 install pyds9
 RUN rm -rf ${CONDAPFX}/pkgs/*
 RUN chmod -R g+rwx ${CONDAPFX}
 
