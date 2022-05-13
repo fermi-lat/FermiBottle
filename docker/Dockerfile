@@ -137,7 +137,9 @@ RUN $MAMBA create --name fermi -c conda-forge -c fermi -c fermi/label/dev \
   gammapy \
   healpy \
   jupyter \
+  jupyter_server \
   libpng \
+  "matplotlib>=3.5" \
   numpy \
   scipy \
   --yes
@@ -147,16 +149,16 @@ RUN $MAMBA create --name fermi -c conda-forge -c fermi -c fermi/label/dev \
   # naima \
   # astromodels \
   # threeml \
-#
-# RUN export CONDA_PREFIX=${CONDAPFX}/envs/fermi && \
-#     source ${CONDAPFX}/envs/fermi/etc/conda/activate.d/activate_fermitools.sh && \
-#     echo $FERMI_DIR $FERMI_INST_DIR $INST_DIR && \
-#     git clone --depth 1 --branch v1.1 https://github.com/fermiPy/fermipy.git && \
-#     cd fermipy && ${CONDAPFX}/envs/fermi/bin/pip3 install . -vv && cd ../ && \
-#     rm -rf fermipy && \
-#     source ${CONDAPFX}/envs/fermi/etc/conda/deactivate.d/deactivate_fermitools.sh
 
-RUN $CONDAPFX/envs/fermi/bin/pip3 install pyds9 fermipy threeml astromodels
+RUN export CONDA_PREFIX=${CONDAPFX}/envs/fermi && \
+    source ${CONDAPFX}/envs/fermi/etc/conda/activate.d/activate_fermitools.sh && \
+    echo $FERMI_DIR $FERMI_INST_DIR $INST_DIR && \
+    git clone --depth 1 --branch v1.1.1 https://github.com/fermiPy/fermipy.git && \
+    cd fermipy && ${CONDAPFX}/envs/fermi/bin/pip3 install . -vv && cd ../ && \
+    rm -rf fermipy && \
+    source ${CONDAPFX}/envs/fermi/etc/conda/deactivate.d/deactivate_fermitools.sh
+
+RUN $CONDAPFX/envs/fermi/bin/pip3 install pyds9 threeml astromodels
 RUN rm -rf ${CONDAPFX}/pkgs/*
 RUN chmod -R g+rwx ${CONDAPFX}
 
@@ -164,15 +166,14 @@ RUN chmod -R g+rwx ${CONDAPFX}
 # GBM Data Tools
 ########################
 RUN curl -s -L \
-  https://fermi.gsfc.nasa.gov/ssc/data/analysis/gbm/gbm_data_tools/gbm_data_tools-1.1.1.tar.gz > gbm_data_tools-1.1.1.tar.gz
-RUN GEOS_DIR=/envs/fermi/lib  $CONDAPFX/envs/fermi/bin/pip3 install gbm_data_tools-1.1.1.tar.gz &&\
-  rm gbm_data_tools-1.1.1.tar.gz
-
-RUN curl -s -L \
   https://fermi.gsfc.nasa.gov/ssc/data/analysis/gbm/gspec/gspec-0.9.1.tar.gz > gspec-0.9.1.tar.gz
-RUN $CONDABIN create --name gspec -c conda-forge astropy pip --yes &&\
-  $CONDAPFX/envs/gspec/bin/pip3 install gspec-0.9.1.tar.gz &&\
+RUN $CONDABIN create --name fermigbm -c conda-forge astropy pip --yes &&\
+  $CONDAPFX/envs/fermigbm/bin/pip3 install gspec-0.9.1.tar.gz &&\
   rm gspec-0.9.1.tar.gz
+RUN curl -s -L \
+  https://fermi.gsfc.nasa.gov/ssc/data/analysis/gbm/gbm_data_tools/gbm_data_tools-1.1.1.tar.gz > gbm_data_tools-1.1.1.tar.gz
+RUN GEOS_DIR=/envs/fermigbm/lib  $CONDAPFX/envs/fermigbm/bin/pip3 install gbm_data_tools-1.1.1.tar.gz &&\
+  rm gbm_data_tools-1.1.1.tar.gz
 
 # Fermitools prefix
 ENV FERMIPFX $CONDAPFX/envs/fermi
