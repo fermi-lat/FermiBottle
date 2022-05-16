@@ -177,6 +177,7 @@ RUN $CONDABIN create --name fermigbm -c conda-forge \
     numpy \
     scipy \
     pip \
+    python=3.9 \
     --yes &&\
   $CONDAPFX/envs/fermigbm/bin/pip3 install gspec-0.9.1.tar.gz &&\
   rm gspec-0.9.1.tar.gz
