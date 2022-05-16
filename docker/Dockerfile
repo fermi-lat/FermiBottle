@@ -167,7 +167,17 @@ RUN chmod -R g+rwx ${CONDAPFX}
 ########################
 RUN curl -s -L \
   https://fermi.gsfc.nasa.gov/ssc/data/analysis/gbm/gspec/gspec-0.9.1.tar.gz > gspec-0.9.1.tar.gz
-RUN $CONDABIN create --name fermigbm -c conda-forge astropy cfitsio healpy pip --yes &&\
+RUN $CONDABIN create --name fermigbm -c conda-forge \
+    astropy \
+    cfitsio \
+    healpy \
+    jupyter \
+    jupyter_server \
+    libpng \
+    numpy \
+    scipy \
+    pip \
+    --yes &&\
   $CONDAPFX/envs/fermigbm/bin/pip3 install gspec-0.9.1.tar.gz &&\
   rm gspec-0.9.1.tar.gz
 RUN curl -s -L \
