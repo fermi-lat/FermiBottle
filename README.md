@@ -22,7 +22,7 @@ The FermiBottle includes the following high level packages for high energy astro
 | [PRESTO](https://github.com/scottransom/presto)                      | 4.0       | -                 | Large suite of pulsar search and analysis software|
 | [TEMPO](http://tempo.sourceforge.net/)                               | 13.1      | -                 | Pulsar timing data analysis|
 | [TEMPO2](https://www.atnf.csiro.au/research/pulsar/tempo2/)          | 2018.02.1 | -                 | Software package for pulsar timing|
-<!-- | [PINT](https://pypi.org/project/pint-pulsar/)                        | 0.7       | fermi             | Project to develop a new pulsar timing solution based on python and modern libraries | -->
-<!-- | [naima](https://naima.readthedocs.io/en/latest/)                     | 0.8.4     | fermi             | Python package for computation of non-thermal radiation from relativistic particle populations | -->
 | [SAOImageDS9](https://github.com/SAOImageDS9/SAOImageDS9)            | 8.2.1     | -                 | Image display and visualization tool for astronomical data|
 | [pyds9](http://hea-www.harvard.edu/RD/pyds9/)                        | 1.8.1     | -                 | Python interface to communicate with SAOImageDS9|
+<!-- | [PINT](https://pypi.org/project/pint-pulsar/)                        | 0.7       | fermi             | Project to develop a new pulsar timing solution based on python and modern libraries | -->
+<!-- | [naima](https://naima.readthedocs.io/en/latest/)                     | 0.8.4     | fermi             | Python package for computation of non-thermal radiation from relativistic particle populations | -->
