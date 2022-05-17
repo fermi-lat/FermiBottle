@@ -64,6 +64,7 @@ if [ ! .bashrc -nt /.fermibottle ]; then
   echo "
 # Aliases
 alias notebook='jupyter notebook --ip 00.00.00.00 --no-browser'
+alias gbm-demos='jupyter notebook --ip 00.00.00.00 --no-browser /home/fermi/.gbm_data_tools/1.1.1/tutorials'
 " >> $HOME/.bashrc
 fi
 
