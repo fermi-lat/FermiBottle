@@ -39,6 +39,8 @@ RUN yum install -y --enablerepo=powertools \
   git \
   libpng-devel \
   libSM-devel \
+  libxml2-devel \
+  libxslt-devel \
   libX11-devel \
   libXdmcp-devel \
   libXext-devel \
@@ -57,6 +59,8 @@ RUN yum install -y --enablerepo=powertools \
   sqlite-devel \
   sudo \
   tar \
+  tcl-devel \
+  tk-devel \
   vim \
   wget \
   which \
@@ -72,17 +76,15 @@ RUN mkdir -p $ASTROPFX
 # Install Heasarc Ftools from nifty script. Note, we
 # must first copy the install script into the container
 # before we can execute it, which is unfortunate.
-COPY setup_ftools.sh $HOME/setup_ftools.sh
-RUN sh setup_ftools.sh && rm setup_ftools.sh
-# RUN curl -s -L https://heasarc.gsfc.nasa.gov/FTP/software/lheasoft/lheasoft6.30.1/heasoft-6.30.1src_no_xspec_modeldata.tar.gz | tar zxv -o heasoft-6.30.1
-# RUN cd heasoft-6.30.1/BUILD_DIR &&\
-# FTOOLS=$ASTROPFX/ftools && \
-# mkdir -p $FTOOLS
-# RUN ./configure --prefix=$FTOOLS CFLAGS=-fpic --enable-collapse \
-#   --with-components="heacore tcltk attitude heatools Xspec ftools "
-# RUN ./hmake -j4
-# RUN ./hmake install
-# RUN chmod -R g+rwx $ASTROPFX/ftools
+RUN curl -s -L https://heasarc.gsfc.nasa.gov/FTP/software/lheasoft/lheasoft6.30.1/heasoft-6.30.1src_no_xspec_modeldata.tar.gz | tar zxv -o heasoft-6.30.1
+ENV FTOOLS=$ASTROPFX/ftools
+RUN mkdir -p $FTOOLS
+WORKDIR heasoft-6.30.1/BUILD_DIR
+RUN ./configure --prefix=$FTOOLS CFLAGS=-fpic --enable-collapse --with-components="heacore tcltk attitude heatools Xspec ftools "
+RUN ./hmake
+RUN ./hmake install
+RUN chmod -R g+rwx $ASTROPFX/ftools
+WORKDIR ../../
 
 # Tempo
 COPY setup_tempo.sh $HOME/setup_tempo.sh
@@ -110,27 +112,21 @@ RUN sh setup_tempo2.sh && rm setup_tempo2.sh
 
 # DS9
 RUN mkdir $ASTROPFX/bin
-COPY ds9 $ASTROPFX/bin/ds9
-# RUN mkdir $ASTROPFX/bin &&\
-#  cd $ASTROPFX/bin &&\
-#  curl http://ds9.si.edu/download/centos7/ds9.centos7.8.2.1.tar.gz | tar zxv
+RUN curl -s -L http://ds9.si.edu/download/source/ds9.8.3.tar.gz | tar zxv
+WORKDIR SAOImageDS9
+RUN unix/configure && make && cp bin/ds9 $ASTROPFX/bin/.
+WORKDIR ../
 
 # Anaconda Fermitools, and other conda packages
 ENV CONDAPFX /opt/anaconda
 ENV CONDABIN ${CONDAPFX}/bin/conda
 ENV MAMBA ${CONDAPFX}/bin/mamba
 
-# Anaconda Fermitools, and other conda packages
-ENV CONDAPFX /opt/anaconda
-ENV CONDABIN ${CONDAPFX}/bin/conda
-ENV MAMBA ${CONDAPFX}/bin/mamba
-
-# RUN curl -s -L https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-aarch64.sh > anaconda.sh && bash anaconda.sh -b -p ${CONDAPFX}
 #
 COPY setup_mambaforge.sh $HOME/setup_mambaforge.sh
 RUN sh setup_mambaforge.sh && rm setup_mambaforge.sh
 
-RUN $CONDABIN install --channel conda-forge --yes mamba su-exec setuptools tini
+RUN $CONDABIN install --channel conda-forge --yes "mamba>=0.23" su-exec setuptools tini
 RUN $MAMBA create --name fermi -c conda-forge -c fermi -c fermi/label/dev \
   fermitools=2.1.25 \
   fermitools-data \
@@ -143,12 +139,6 @@ RUN $MAMBA create --name fermi -c conda-forge -c fermi -c fermi/label/dev \
   numpy \
   scipy \
   --yes
-
-  # pint-pulsar \
-  # fermipy=1.0.1 \
-  # naima \
-  # astromodels \
-  # threeml \
 
 RUN export CONDA_PREFIX=${CONDAPFX}/envs/fermi && \
     source ${CONDAPFX}/envs/fermi/etc/conda/activate.d/activate_fermitools.sh && \
