@@ -19,7 +19,7 @@ export HOME=/home/fermi
 export USER=fermi
 export LOGNAME=fermi
 export MAIL=/var/spool/mail/fermi
-export HEADAS=$(find $HOME/astrosoft/ftools/ -type d -name "$(uname -m)*")
+export HEADAS="$(find /home/astrosoft/ftools -type d -name $(uname -m)*)"
 export TEMPO2=$HOME/astrosoft/tempo2/T2runtime
 export ASTROSOFT=$HOME/astrosoft
 export PATH=$ASTROSOFT:/opt/anaconda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
@@ -30,11 +30,11 @@ export PATH=$ASTROSOFT/tempo/bin:$ASTROSOFT/tempo2/bin:$ASTROSOFT/pgplot:$PATH
 ln -s /home/astrosoft /home/fermi/astrosoft
 ln -s /home/astrosoft/.gbm_data_tools /home/fermi/.gbm_data_tools
 ln -s /opt/anaconda/bin/conda /home/fermi/astrosoft/bin/conda
-/opt/anaconda/bin/conda config --add channels conda-forge
+# /opt/anaconda/bin/conda config --add channels conda-forge
 /opt/anaconda/bin/conda config --add channels fermi
 chown -R fermi:fermi /home/astrosoft/.gbm_data_tools
 chown fermi:fermi $HOME/.condarc
-chown fermi:fermi $HOME/.config
+# chown fermi:fermi $HOME/.config
 chown fermi:fermi $HOME/astrosoft
 chown fermi:fermi $HOME/.gbm_data_tools
 chown -R fermi:fermi $HOME
