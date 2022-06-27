@@ -127,8 +127,8 @@ COPY setup_mambaforge.sh $HOME/setup_mambaforge.sh
 RUN sh setup_mambaforge.sh && rm setup_mambaforge.sh
 
 RUN $CONDABIN install --channel conda-forge --yes "mamba>=0.23" su-exec setuptools tini
-RUN $MAMBA create --name fermi -c conda-forge -c fermi -c fermi/label/dev \
-  fermitools=2.1.25 \
+RUN $MAMBA create --name fermi -c conda-forge -c fermi -c fermi/label/rc \
+  "fermitools>=2.2" \
   fermitools-data \
   gammapy \
   healpy \
