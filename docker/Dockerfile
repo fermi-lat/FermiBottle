@@ -76,10 +76,10 @@ RUN mkdir -p $ASTROPFX
 # Install Heasarc Ftools from nifty script. Note, we
 # must first copy the install script into the container
 # before we can execute it, which is unfortunate.
-RUN curl -s -L https://heasarc.gsfc.nasa.gov/FTP/software/lheasoft/lheasoft6.30.1/heasoft-6.30.1src_no_xspec_modeldata.tar.gz | tar zxv -o heasoft-6.30.1
+RUN curl -s -L https://heasarc.gsfc.nasa.gov/FTP/software/lheasoft/lheasoft6.31.1/heasoft-6.31.1src_no_xspec_modeldata.tar.gz | tar zxv -o heasoft-6.31.1
 ENV FTOOLS=$ASTROPFX/ftools
 RUN mkdir -p $FTOOLS
-WORKDIR heasoft-6.30.1/BUILD_DIR
+WORKDIR heasoft-6.31.1/BUILD_DIR
 RUN ./configure --prefix=$FTOOLS CFLAGS=-fpic --enable-collapse --with-components="heacore tcltk attitude heatools Xspec ftools "
 RUN ./hmake
 RUN ./hmake install
@@ -105,18 +105,6 @@ RUN curl -s -L ftp://ftp.astro.caltech.edu/pub/pgplot/pgplot5.2.tar.gz > pgplot5
  chmod -R g+rwx $ASTROPFX/pgplot &&\
  rm -rf /pgplot
 
-# Tempo2
-ENV TEMPO2 $ASTROPFX/tempo2/T2runtime
-COPY setup_tempo2.sh $HOME/setup_tempo2.sh
-RUN sh setup_tempo2.sh && rm setup_tempo2.sh
-
-# DS9
-RUN mkdir $ASTROPFX/bin
-RUN curl -s -L http://ds9.si.edu/download/source/ds9.8.4.1.tar.gz | tar zxv
-WORKDIR SAOImageDS9
-RUN unix/configure && make && cp bin/ds9 $ASTROPFX/bin/.
-WORKDIR ../
-
 # Anaconda Fermitools, and other conda packages
 ENV CONDAPFX /opt/anaconda
 ENV CONDABIN ${CONDAPFX}/bin/conda
@@ -136,12 +124,12 @@ RUN $MAMBA create --name fermi -c conda-forge -c fermi -c fermi/label/dev \
   jupyter_server \
   libpng \
   "matplotlib>=3.5" \
-  numpy \
+  "numpy<1.24.0" \
   scipy \
   --yes
 
 
-RUN $CONDAPFX/envs/fermi/bin/pip3 install fermipy pyds9 threeml astromodels
+RUN $CONDAPFX/envs/fermi/bin/pip3 install fermipy pyds9 threeml astromodels pint-pulsar
 RUN rm -rf ${CONDAPFX}/pkgs/*
 RUN chmod -R g+rwx ${CONDAPFX}
 
@@ -171,6 +159,19 @@ RUN GEOS_DIR=/envs/fermigbm/lib  $CONDAPFX/envs/fermigbm/bin/pip3 install gbm_da
 
 # Fermitools prefix
 ENV FERMIPFX $CONDAPFX/envs/fermi
+
+# Tempo2
+ENV TEMPO2 $ASTROPFX/tempo2/T2runtime
+COPY setup_tempo2.sh $HOME/setup_tempo2.sh
+RUN sh setup_tempo2.sh && rm setup_tempo2.sh
+
+# DS9
+RUN mkdir $ASTROPFX/bin
+RUN curl -s -L http://ds9.si.edu/download/source/ds9.8.4.1.tar.gz | tar zxv
+WORKDIR SAOImageDS9
+RUN unix/configure && make && cp bin/ds9 $ASTROPFX/bin/.
+WORKDIR ../
+
 
 
 ##########################################################################
