@@ -103,6 +103,7 @@ RUN curl -s -L ftp://ftp.astro.caltech.edu/pub/pgplot/pgplot5.2.tar.gz > pgplot5
  sed -i -e 's/^FCOMPL=g77/FCOMPL=gfortran/g' makefile &&\
  make && make cpg && make clean &&\
  chmod -R g+rwx $ASTROPFX/pgplot &&\
+ cp $ASTROPFX/pgplot/libpgplot.so /usr/lib64/ &&\
  rm -rf /pgplot
 
 # Anaconda Fermitools, and other conda packages
@@ -203,6 +204,7 @@ COPY --from=builder --chown=root:wheel $ASTROPFX/pgplot $ASTROPFX/pgplot
 COPY --from=builder --chown=root:wheel $ASTROPFX/tempo2 $ASTROPFX/tempo2
 COPY --from=builder --chown=root:wheel $ASTROPFX/bin $ASTROPFX/bin
 COPY --from=builder --chown=root:wheel /root/.gbm_data_tools $ASTROPFX/.gbm_data_tools
+COPY --from=builder --chown=root:wheel /usr/lib64/libpgplot.so  /usr/lib64/libpgplot.so 
 
 # Now install a bunch of Yum packages, not the devel versions.
 RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
