@@ -141,7 +141,10 @@ RUN curl -s -L \
   https://fermi.gsfc.nasa.gov/ssc/data/analysis/gbm/gspec/gspec-0.9.1.tar.gz > gspec-0.9.1.tar.gz
 RUN $CONDABIN create --name fermigbm -c conda-forge \
     astropy \
+    basemap-data \
+    basemap-data-hires \
     cfitsio \
+    geos \
     healpy \
     jupyter \
     jupyter_server \
@@ -153,10 +156,10 @@ RUN $CONDABIN create --name fermigbm -c conda-forge \
     --yes &&\
   $CONDAPFX/envs/fermigbm/bin/pip3 install gspec-0.9.1.tar.gz &&\
   rm gspec-0.9.1.tar.gz
-RUN curl -s -L \
-  https://fermi.gsfc.nasa.gov/ssc/data/analysis/gbm/gbm_data_tools/gbm_data_tools-1.1.1.tar.gz > gbm_data_tools-1.1.1.tar.gz
-RUN GEOS_DIR=/envs/fermigbm/lib  $CONDAPFX/envs/fermigbm/bin/pip3 install gbm_data_tools-1.1.1.tar.gz &&\
-  rm gbm_data_tools-1.1.1.tar.gz
+RUN GEOS_DIR=${CONDAPFX}/envs/fermigbm/lib  $CONDAPFX/envs/fermigbm/bin/pip3 install \
+    'basemap @ git+https://github.com/matplotlib/basemap@298633836d4ade5206bfa9287031cb9989317b71#subdirectory=packages/basemap'
+RUN GEOS_DIR=${CONDAPFX}/envs/fermigbm/lib  $CONDAPFX/envs/fermigbm/bin/pip3 install \
+    'https://fermi.gsfc.nasa.gov/ssc/data/analysis/gbm/gbm_data_tools/gbm_data_tools-1.1.1.tar.gz'
 
 # Fermitools prefix
 ENV FERMIPFX $CONDAPFX/envs/fermi
