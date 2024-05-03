@@ -23,6 +23,7 @@ FROM centos:8 as builder
 RUN cd /etc/yum.repos.d/
 RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
 RUN sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+RUN yum install -y epel-release
 RUN yum update -y
 # RUN yum install -y centos-release-scl
 # RUN yum install -y devtoolset-7-gcc*
@@ -37,6 +38,7 @@ RUN yum install -y --enablerepo=powertools \
   gcc-c++ \
   gcc-gfortran \
   git \
+  hdf5-devel \
   libpng-devel \
   libSM-devel \
   libxml2-devel \
@@ -76,10 +78,10 @@ RUN mkdir -p $ASTROPFX
 # Install Heasarc Ftools from nifty script. Note, we
 # must first copy the install script into the container
 # before we can execute it, which is unfortunate.
-RUN curl -s -L https://heasarc.gsfc.nasa.gov/FTP/software/lheasoft/lheasoft6.31.1/heasoft-6.31.1src_no_xspec_modeldata.tar.gz | tar zxv -o heasoft-6.31.1
+RUN curl -s -L https://heasarc.gsfc.nasa.gov/FTP/software/lheasoft/release/heasoft-6.33.2src_no_xspec_modeldata.tar.gz | tar zxv -o heasoft-6.33.2
 ENV FTOOLS=$ASTROPFX/ftools
 RUN mkdir -p $FTOOLS
-WORKDIR heasoft-6.31.1/BUILD_DIR
+WORKDIR heasoft-6.33.2/BUILD_DIR
 RUN ./configure --prefix=$FTOOLS CFLAGS=-fpic --enable-collapse --with-components="heacore tcltk attitude heatools Xspec ftools "
 RUN ./hmake
 RUN ./hmake install
@@ -112,12 +114,14 @@ ENV CONDABIN ${CONDAPFX}/bin/conda
 ENV MAMBA ${CONDAPFX}/bin/mamba
 
 #
-COPY setup_mambaforge.sh $HOME/setup_mambaforge.sh
-RUN sh setup_mambaforge.sh && rm setup_mambaforge.sh
+ENV MINIFORGE_URL="https://github.com/conda-forge/miniforge/releases/latest/download"
+ENV MINIFORGE_FILE=""
+RUN curl -s -L -O "${MINIFORGE_URL}/Mambaforge-Linux-$(uname -m).sh" 
+RUN bash "Mambaforge-Linux-$(uname -m).sh" -b -p ${CONDAPFX}
 
 RUN $CONDABIN install --channel conda-forge --yes "mamba>=0.23" su-exec setuptools tini
 RUN $MAMBA create --name fermi -c conda-forge -c fermi -c fermi/label/dev \
-  "fermitools>=2.2" \
+  "fermitools>=2.2.11" \
   fermitools-data \
   gammapy \
   healpy \
@@ -129,8 +133,10 @@ RUN $MAMBA create --name fermi -c conda-forge -c fermi -c fermi/label/dev \
   scipy \
   --yes
 
-
-RUN $CONDAPFX/envs/fermi/bin/pip3 install fermipy pyds9 threeml astromodels pint-pulsar
+# ENV FERMI_DIR=${CONDAPFX}/envs/fermi-dev/share/fermitools
+# RUN $FERMI_DIR/etc/conda/activate.d/activate_fermitools.sh $CONDAPFX/envs/fermi/bin/pip3 install fermipy pyds9 threeml astromodels pint-pulsar
+RUN ln -s ${CONDAPFX}/envs/fermi-dev/share/fermitools/refdata /refdata
+RUN $CONDAPFX/envs/fermi/bin/pip3 install fermipy==1.2.0 pyds9 threeml astromodels pint-pulsar
 RUN rm -rf ${CONDAPFX}/pkgs/*
 RUN chmod -R g+rwx ${CONDAPFX}
 
@@ -156,9 +162,11 @@ RUN $CONDABIN create --name fermigbm -c conda-forge \
     --yes &&\
   $CONDAPFX/envs/fermigbm/bin/pip3 install gspec-0.9.1.tar.gz &&\
   rm gspec-0.9.1.tar.gz
-RUN GEOS_DIR=${CONDAPFX}/envs/fermigbm/lib  $CONDAPFX/envs/fermigbm/bin/pip3 install \
-    'basemap @ git+https://github.com/matplotlib/basemap@298633836d4ade5206bfa9287031cb9989317b71#subdirectory=packages/basemap'
-RUN GEOS_DIR=${CONDAPFX}/envs/fermigbm/lib  $CONDAPFX/envs/fermigbm/bin/pip3 install \
+RUN GEOS_DIR=${CONDAPFX}/envs/fermigbm/lib \
+    $CONDAPFX/envs/fermigbm/bin/pip3 install \
+    'basemap @ git+https://github.com/matplotlib/basemap@v1.4.1#subdirectory=packages/basemap'
+RUN GEOS_DIR=${CONDAPFX}/envs/fermigbm/lib \
+    $CONDAPFX/envs/fermigbm/bin/pip3 install \
     'https://fermi.gsfc.nasa.gov/ssc/data/analysis/gbm/gbm_data_tools/gbm_data_tools-1.1.1.tar.gz'
 
 # Fermitools prefix
@@ -171,7 +179,7 @@ RUN sh setup_tempo2.sh && rm setup_tempo2.sh
 
 # DS9
 RUN mkdir $ASTROPFX/bin
-RUN curl -s -L http://ds9.si.edu/download/source/ds9.8.4.1.tar.gz | tar zxv
+RUN curl -s -L http://ds9.si.edu/download/source/ds9.8.5.tar.gz | tar zxv
 WORKDIR SAOImageDS9
 RUN unix/configure && make && cp bin/ds9 $ASTROPFX/bin/.
 WORKDIR ../
