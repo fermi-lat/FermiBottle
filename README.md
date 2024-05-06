@@ -19,10 +19,10 @@ The FermiBottle includes the following high level packages for high energy astro
 | [Gammpy](https://gammapy.org/)                                       | 1.2       | fermi             | Python package for gamma-ray astronomy |
 | [GSpec](https://fermi.gsfc.nasa.gov/ssc/data/analysis/gbm/)          | 0.9.1     | fermigbm          | GBM data analysis via a user-interactive GUI |
 | [GBM Data Tools](https://fermi.gsfc.nasa.gov/ssc/data/analysis/gbm/) | 1.1.1     | fermigbm          | High-level API layer allowing a user to read, reduce, and visualize GBM data|
-<!-- | [PRESTO](https://github.com/scottransom/presto)                      | 4.0       | -                 | Large suite of pulsar search and analysis software| -->
 | [TEMPO](http://tempo.sourceforge.net/)                               | 13.1      | -                 | Pulsar timing data analysis|
 | [TEMPO2](https://www.atnf.csiro.au/research/pulsar/tempo2/)          | 2021.06.1 | -                 | Software package for pulsar timing|
 | [SAOImageDS9](https://github.com/SAOImageDS9/SAOImageDS9)            | 8.5.0     | -                 | Image display and visualization tool for astronomical data|
 | [pyds9](http://hea-www.harvard.edu/RD/pyds9/)                        | 1.8.1     | -                 | Python interface to communicate with SAOImageDS9|
 | [PINT](https://pypi.org/project/pint-pulsar/)                        | 1.0       | fermi             | Project to develop a new pulsar timing solution based on python and modern libraries |
+<!-- | [PRESTO](https://github.com/scottransom/presto)                      | 4.0       | -                 | Large suite of pulsar search and analysis software| -->
 <!-- | [naima](https://naima.readthedocs.io/en/latest/)                     | 0.8.4     | fermi             | Python package for computation of non-thermal radiation from relativistic particle populations | -->
