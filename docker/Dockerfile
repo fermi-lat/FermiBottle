@@ -131,13 +131,12 @@ RUN $MAMBA create --name fermi -c conda-forge -c fermi -c fermi/label/dev \
   libpng \
   "matplotlib>=3.5" \
   "numpy<1.24.0" \
-  "python==3.9" \
+  "python==3.9.*" \
   "scipy<1.12" \
   --yes
 
-# ENV FERMI_DIR=${CONDAPFX}/envs/fermi/share/fermitools
-# RUN $FERMI_DIR/etc/conda/activate.d/activate_fermitools.sh $CONDAPFX/envs/fermi/bin/pip3 install fermipy pyds9 threeml astromodels pint-pulsar
-# RUN ln -s ${FERMI_DIR}/data//caldb ${FERMI_DIR}/data/caldb
+RUN sed -i '89,91d' ${CONDAPFX}/envs/fermi/etc/conda/activate.d/activate_fermitools.sh
+
 RUN $CONDAPFX/envs/fermi/bin/pip3 install fermipy==1.2.0 pyds9 threeml astromodels pint-pulsar
 RUN rm -rf ${CONDAPFX}/pkgs/*
 RUN chmod -R g+rwx ${CONDAPFX}
