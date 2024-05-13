@@ -137,7 +137,11 @@ RUN $MAMBA create --name fermi -c conda-forge -c fermi -c fermi/label/dev \
 
 RUN sed -i '89,91d' ${CONDAPFX}/envs/fermi/etc/conda/activate.d/activate_fermitools.sh
 
-RUN $CONDAPFX/envs/fermi/bin/pip3 install fermipy==1.2.0 pyds9 threeml astromodels pint-pulsar
+RUN $CONDAPFX/envs/fermi/bin/pip3 install fermipy==1.2.0 pyds9 pint-pulsar
+RUN $CONDAPFX/envs/fermi/bin/pip3 install \
+    git+https://github.com/threeML/astromodels.git@7c13c25df98dad10354d0c461cc3a0b5ad9b435a \
+    git+https://github.com/threeML/threeML.git@f049b6605ddc3cf33bde1b69f64d629fc274fd59
+
 RUN rm -rf ${CONDAPFX}/pkgs/*
 RUN chmod -R g+rwx ${CONDAPFX}
 
