@@ -28,15 +28,14 @@ export PATH=$ASTROSOFT/tempo/bin:$ASTROSOFT/tempo2/bin:$ASTROSOFT/pgplot:$PATH
 
 ## Solve permissions issues
 ln -s /home/astrosoft /home/fermi/astrosoft
-ln -s /home/astrosoft/.gbm_data_tools /home/fermi/.gbm_data_tools
+### ln -s /home/astrosoft/.gammaray_data_tools /home/fermi/.gammaray_data_tools
+
 ln -s /opt/anaconda/bin/conda /home/fermi/astrosoft/bin/conda
-# /opt/anaconda/bin/conda config --add channels conda-forge
 /opt/anaconda/bin/conda config --add channels fermi
-chown -R fermi:fermi /home/astrosoft/.gbm_data_tools
+### chown -R fermi:fermi /home/astrosoft/.gammaray_data_tools
 chown fermi:fermi $HOME/.condarc
-# chown fermi:fermi $HOME/.config
 chown fermi:fermi $HOME/astrosoft
-chown fermi:fermi $HOME/.gbm_data_tools
+#### chown fermi:fermi $HOME/.gammaray_data_tools
 chown -R fermi:fermi $HOME
 cd $HOME
 

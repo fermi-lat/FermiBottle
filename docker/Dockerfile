@@ -9,27 +9,33 @@
 # Build instructions are split variously across separate install
 # scripts, or continuous RUN lines.
 
-
 ##########################################################################
 #                             Start Builder
 ##########################################################################
 
-# Use Centos 8 as our base. Name the builder container builder.
+# Use Centos 9 as our base. Name the builder container builder.
 # This container will be thrown away once its contents are copied
-# into another centos:8 container at the end of the script.
-FROM centos:8 as builder
+# into another centos:9 container at the end of the script.
+# https://www.centos.org/download/
+# 2027-05-31 (End of RHEL9 full support phase)
+FROM rockylinux/rockylinux:9.5 AS builder
 
 # Install necessary dev packages from YUM, in alphabetical order
-RUN cd /etc/yum.repos.d/
-RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
-RUN sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
-RUN yum install -y epel-release
+WORKDIR /etc/yum.repos.d/
+RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/rocky*
+RUN sed -i 's|#baseurl=|baseurl=|g' /etc/yum.repos.d/rocky*
+RUN echo "[main]" >> /etc/yum.conf && echo "timeout=90" >> /etc/yum.conf
+RUN yum install -y epel-release 
 RUN yum update -y
-# RUN yum install -y centos-release-scl
-# RUN yum install -y devtoolset-7-gcc*
-# RUN yum update -y
-# RUN yum install -y \
-RUN yum install -y --enablerepo=powertools \
+
+RUN dnf install epel-release &&\
+    dnf config-manager --enable epel &&\
+    dnf install yum-utils -y &&\
+    dnf config-manager --set-enabled crb &&\
+    dnf update -y
+
+# Should this be in another image (we build weekly) that we just "from" ?
+RUN dnf install -y --enablerepo=crb \
   autoconf \
   automake \
   bzip2-devel \
@@ -67,32 +73,43 @@ RUN yum install -y --enablerepo=powertools \
   wget \
   which \
   zlib-devel && \
-yum clean all && \
-rm -rf /var/cache/yum
+dnf clean all && \
+rm -rf /var/cache/dnf
 
 # Create the astrosoft directory in /home. This will be our
 # install target for all astronomy software
-ENV ASTROPFX /home/astrosoft
+ENV ASTROPFX=/home/astrosoft
 RUN mkdir -p $ASTROPFX
 
 # Install Heasarc Ftools from nifty script. Note, we
 # must first copy the install script into the container
-# before we can execute it, which is unfortunate.
-RUN curl -s -L https://heasarc.gsfc.nasa.gov/FTP/software/lheasoft/release/heasoft-6.33.2src_no_xspec_modeldata.tar.gz | tar zxv -o heasoft-6.33.2
+# before we can execute it, which is unfortunate.  heasoft-6.33.2
+### Breaks tempo shell - SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+# Latest release 6.35 Mar 2025
+RUN curl -s -L https://heasarc.gsfc.nasa.gov/FTP/software/lheasoft/release/heasoft-6.35src_no_xspec_modeldata.tar.gz | tar zxv -o heasoft-6.35
 ENV FTOOLS=$ASTROPFX/ftools
 RUN mkdir -p $FTOOLS
-WORKDIR heasoft-6.33.2/BUILD_DIR
-RUN ./configure --prefix=$FTOOLS CFLAGS=-fpic --enable-collapse --with-components="heacore tcltk attitude heatools Xspec ftools "
-RUN ./hmake
-RUN ./hmake install
-RUN chmod -R g+rwx $ASTROPFX/ftools
-WORKDIR ../../
 
-# Tempo
-COPY setup_tempo.sh $HOME/setup_tempo.sh
+# /etc/yum.repos.d/heasoft-6.35/
+WORKDIR heasoft-6.35/BUILD_DIR
+RUN ./configure --prefix=$FTOOLS CFLAGS=-fpic --enable-collapse --with-components="heacore tcltk attitude heatools Xspec ftools "
+RUN ./hmake &&\
+    ./hmake install &&\
+    chmod -R g+rwx $ASTROPFX/ftools
+
+WORKDIR ../../
+# /etc/yum.repos.d/
+
+# Tempo 
+# COPY setup_tempo.sh $HOME/setup_tempo.sh
+# RUN sh $HOME/setup_tempo.sh && rm $HOME/setup_tempo.sh
+
+COPY setup_tempo.sh setup_tempo.sh
 RUN sh setup_tempo.sh && rm setup_tempo.sh
 
+WORKDIR /
 # pgplot. This should really be its own script.
+# Do that JSA 03 2025
 RUN curl -s -L ftp://ftp.astro.caltech.edu/pub/pgplot/pgplot5.2.tar.gz > pgplot5.2.tar.gz &&\
  tar zxvf pgplot5.2.tar.gz &&\
  rm -rf /pgplot5.2.tar.gz &&\
@@ -109,48 +126,47 @@ RUN curl -s -L ftp://ftp.astro.caltech.edu/pub/pgplot/pgplot5.2.tar.gz > pgplot5
  rm -rf /pgplot
 
 # Anaconda Fermitools, and other conda packages
-ENV CONDAPFX /opt/anaconda
-ENV CONDABIN ${CONDAPFX}/bin/conda
-ENV MAMBA ${CONDAPFX}/bin/mamba
+ENV CONDAPFX=/opt/anaconda
+ENV CONDABIN=${CONDAPFX}/bin/conda
+ENV MAMBA=${CONDAPFX}/bin/mamba
+ENV MAMBA_ROOT_PREFIX=${CONDAPFX}
 
-#
 ENV MINIFORGE_URL="https://github.com/conda-forge/miniforge/releases/latest/download"
 ENV MINIFORGE_FILE=""
-RUN curl -s -L -O "${MINIFORGE_URL}/Mambaforge-Linux-$(uname -m).sh" 
-RUN bash "Mambaforge-Linux-$(uname -m).sh" -b -p ${CONDAPFX}
+RUN curl -s -L -O "${MINIFORGE_URL}/Miniforge3-Linux-$(uname -m).sh" &&\
+    bash "Miniforge3-Linux-$(uname -m).sh" -b -p ${CONDAPFX}
 
-RUN $CONDABIN install --channel conda-forge --yes "mamba>=0.23" su-exec setuptools tini
+# setuptools<74
+RUN $CONDABIN install --channel conda-forge --yes "mamba>=0.23" su-exec "setuptools" tini
 RUN $MAMBA create --name fermi -c conda-forge -c fermi -c fermi/label/dev \
-  "astropy<6" \
-  "fermitools==2.2.11" \
+  "astropy" \
+  "fermitools==2.3.53" \
   fermitools-data \
   gammapy \
   healpy \
   jupyter \
   jupyter_server \
   libpng \
-  "matplotlib>=3.5" \
-  "numpy<1.24.0" \
-  "python==3.9.*" \
-  "scipy<1.12" \
-  --yes
+  "matplotlib" \
+  "numpy" \
+  "python==3.11.*" \
+  "scipy" 
+  
 
 RUN sed -i '89,91d' ${CONDAPFX}/envs/fermi/etc/conda/activate.d/activate_fermitools.sh
 
-RUN $CONDAPFX/envs/fermi/bin/pip3 install fermipy==1.2.0 pyds9 pint-pulsar
-RUN $CONDAPFX/envs/fermi/bin/pip3 install \
-    git+https://github.com/threeML/astromodels.git@7c13c25df98dad10354d0c461cc3a0b5ad9b435a \
-    git+https://github.com/threeML/threeML.git@f049b6605ddc3cf33bde1b69f64d629fc274fd59
+# Doesn't install it in the fermi env
+RUN  $CONDABIN install --name fermi https://anaconda.org/conda-forge/fermipy/1.3.1/download/noarch/fermipy-1.3.1-pyh89e64dd_2.conda
 
-RUN rm -rf ${CONDAPFX}/pkgs/*
-RUN chmod -R g+rwx ${CONDAPFX}
+RUN $CONDAPFX/envs/fermi/bin/pip3 install pyds9 pint-pulsar \
+     git+https://github.com/threeML/astromodels.git \
+     git+https://github.com/threeML/threeML.git 
+
+RUN rm -rf ${CONDAPFX}/pkgs/* &&\
+    chmod -R g+rwx ${CONDAPFX}
 
 ########################
-# GBM Data Tools
-########################
-RUN curl -s -L \
-  https://fermi.gsfc.nasa.gov/ssc/data/analysis/gbm/gspec/gspec-0.9.1.tar.gz > gspec-0.9.1.tar.gz
-RUN $CONDABIN create --name fermigbm -c conda-forge \
+RUN $MAMBA create --name fermigbm -c conda-forge \
     astropy \
     basemap-data \
     basemap-data-hires \
@@ -163,40 +179,41 @@ RUN $CONDABIN create --name fermigbm -c conda-forge \
     numpy \
     scipy \
     pip \
-    python=3.9 \
-    --yes &&\
-  $CONDAPFX/envs/fermigbm/bin/pip3 install gspec-0.9.1.tar.gz &&\
-  rm gspec-0.9.1.tar.gz
+    basemap \
+    "python=3.11.*" \
+    --yes
+
+# Hoping to recover space from fermi and fermigdm creations
+RUN $MAMBA clean -a --yes
+
+# Pull the latest version and make sure NOT to get it from pypi:
 RUN GEOS_DIR=${CONDAPFX}/envs/fermigbm/lib \
     $CONDAPFX/envs/fermigbm/bin/pip3 install \
-    'basemap @ git+https://github.com/matplotlib/basemap@v1.4.1#subdirectory=packages/basemap'
-RUN GEOS_DIR=${CONDAPFX}/envs/fermigbm/lib \
-    $CONDAPFX/envs/fermigbm/bin/pip3 install \
-    'https://fermi.gsfc.nasa.gov/ssc/data/analysis/gbm/gbm_data_tools/gbm_data_tools-1.1.1.tar.gz'
+    --no-binary ":none"  git+https://github.com/USRA-STI/gdt-core.git@main \
+    --no-binary ":none"  git+https://github.com/USRA-STI/gdt-fermi.git@main \
+    'scipy>=1.14.0' 
 
 # Fermitools prefix
-ENV FERMIPFX $CONDAPFX/envs/fermi
+ENV FERMIPFX=$CONDAPFX/envs/fermi
 
 # Tempo2
-ENV TEMPO2 $ASTROPFX/tempo2/T2runtime
+ENV TEMPO2=$ASTROPFX/tempo2/T2runtime
 COPY setup_tempo2.sh $HOME/setup_tempo2.sh
 RUN sh setup_tempo2.sh && rm setup_tempo2.sh
 
 # DS9
 RUN mkdir $ASTROPFX/bin
-RUN curl -s -L http://ds9.si.edu/download/source/ds9.8.5.tar.gz | tar zxv
+RUN curl -s -L https://ds9.si.edu/download/source/ds9.8.6.tar.gz | tar zxv
 WORKDIR SAOImageDS9
 RUN unix/configure && make && cp bin/ds9 $ASTROPFX/bin/.
 WORKDIR ../
-
-
 
 ##########################################################################
 #                     End Builder, Start final Product
 ##########################################################################
 
-# Copy build products into a new Container / layer, specifically centos 8
-FROM centos:8
+# Copy build products into a new Container / layer, specifically Rcoky Linux 9
+FROM rockylinux/rockylinux:9.5
 MAINTAINER "Fermi LAT Collaboration" "fermihelp@milkyway.gsfc.nasa.gov"
 
 # This is the default location of the shared directoy.
@@ -208,7 +225,7 @@ VOLUME ["/data"]
 CMD [ "/bin/bash" ]
 
 # Prepary the Environment of the new Container
-ENV ASTROPFX /home/astrosoft
+ENV ASTROPFX=/home/astrosoft
 RUN mkdir -p $ASTROPFX
 
 # Copy all the important stuff from the builder into the final product.
@@ -219,16 +236,29 @@ COPY --from=builder --chown=root:wheel $ASTROPFX/tempo $ASTROPFX/tempo
 COPY --from=builder --chown=root:wheel $ASTROPFX/pgplot $ASTROPFX/pgplot
 COPY --from=builder --chown=root:wheel $ASTROPFX/tempo2 $ASTROPFX/tempo2
 COPY --from=builder --chown=root:wheel $ASTROPFX/bin $ASTROPFX/bin
-COPY --from=builder --chown=root:wheel /root/.gbm_data_tools $ASTROPFX/.gbm_data_tools
-COPY --from=builder --chown=root:wheel /usr/lib64/libpgplot.so  /usr/lib64/libpgplot.so 
+### COPY --from=builder --chown=root:wheel $ASTROPFX/.gammaray_data_tools $ASTROPFX/.gammaray_data_tools
+COPY --from=builder --chown=root:wheel /usr/lib64/libpgplot.so  /usr/lib64/libpgplot.so
 
 # Now install a bunch of Yum packages, not the devel versions.
-RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
-RUN sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/rocky*
+RUN sed -i 's|#baseurl=|baseurl=|g' /etc/yum.repos.d/rocky*
+RUN echo "[main]" >> /etc/yum.conf && echo "timeout=90" >> /etc/yum.conf
 RUN yum update -y
 RUN sed -i '/tsflags=nodocs/d' /etc/yum.conf && \
-yum update -y && \
-yum install -y --enablerepo=powertools \
+yum update -y 
+
+# While the package xorg-x11-apps is deprecated in Red Hat Enterprise Linux 9 (RHEL9), 
+# it is still available and can be installed on Rocky Linux 9 which is based on RHEL. 
+# RUN dnf install xorg-x11-apps
+ 
+RUN dnf install -y epel-release &&\
+    dnf config-manager --enable epel &&\
+    dnf install yum-utils -y &&\
+    dnf config-manager --set-enabled crb &&\
+    dnf update -y
+
+# Should this be in another image (we build weekly) that we just "from" ?
+RUN dnf install -y --enablerepo=crb \
   bzip2 \
   dejavu-lgc-sans-fonts \
   emacs \
@@ -264,11 +294,10 @@ yum install -y --enablerepo=powertools \
   vim-X11 \
   wget \
   which \
-  xorg-x11-apps \
   zlib-devel && \
 yum clean all && \
-rm -rf /var/cache/yum
-# yum --setopt=tsflags='' reinstall shadow-utils &&\
+dnf clean all && \
+rm -rf /var/cache/dnf 
 
 # Give members of the wheel group sudo access to execute all commands
 # Redundantly also give this access to the fermi user
@@ -279,7 +308,6 @@ fermi ALL=NOPASSWD: /usr/bin/yum' >> /etc/sudoers
 RUN echo '/opt/anaconda/envs/fermi/lib' >> /etc/ld.so.conf.d/condalibs.conf
 RUN /opt/anaconda/bin/conda init bash
 RUN sed -i '135,157d' "/opt/anaconda/envs/fermi/etc/conda/activate.d/activate_fermitools.sh"
-
 
 # The entrypoint script is very important. It is the starter script run
 # by docker to prepare a specific container for an individual user.
@@ -297,5 +325,3 @@ ENTRYPOINT ["/opt/docker/bin/entrypoint"]
 ###############################################################################
 ####################### NEW ADDITIONS HERE ####################################
 ###############################################################################
-
-
