@@ -18,18 +18,25 @@
 # into another centos:9 container at the end of the script.
 # https://www.centos.org/download/
 # 2027-05-31 (End of RHEL9 full support phase)
-FROM rockylinux/rockylinux:9.5 AS builder
+FROM rockylinux:9 AS builder
+# FROM rockylinux/rockylinux:9.5-base AS builder
+#FROM rockylinux:9-minimal AS builder
+# FROM almalinux:minimal AS builder
+#FROM quay.io/condaforge/linux-anvil-cos7-x86_64 AS builder
 
 # Install necessary dev packages from YUM, in alphabetical order
 WORKDIR /etc/yum.repos.d/
 RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/rocky*
+# RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/almalinux*
 RUN sed -i 's|#baseurl=|baseurl=|g' /etc/yum.repos.d/rocky*
-RUN echo "[main]" >> /etc/yum.conf && echo "timeout=90" >> /etc/yum.conf
-RUN yum install -y epel-release 
-RUN yum update -y
+#RUN sed -i 's|#baseurl=|baseurl=|g' /etc/yum.repos.d/almalinux*
 
-RUN dnf install epel-release &&\
-    dnf config-manager --enable epel &&\
+RUN echo "[main]" >> /etc/yum.conf && echo "timeout=90" >> /etc/yum.conf
+RUN yum -y install dnf epel-release
+RUN yum update -y
+RUN dnf install -y epel-release 
+
+RUN dnf config-manager --enable epel &&\
     dnf install yum-utils -y &&\
     dnf config-manager --set-enabled crb &&\
     dnf update -y
@@ -213,7 +220,10 @@ WORKDIR ../
 ##########################################################################
 
 # Copy build products into a new Container / layer, specifically Rcoky Linux 9
-FROM rockylinux/rockylinux:9.5
+FROM rockylinux:9
+# FROM rockylinux/rockylinux:9-minimal
+# FROM almalinux:minimal
+
 MAINTAINER "Fermi LAT Collaboration" "fermihelp@milkyway.gsfc.nasa.gov"
 
 # This is the default location of the shared directoy.
@@ -240,8 +250,11 @@ COPY --from=builder --chown=root:wheel $ASTROPFX/bin $ASTROPFX/bin
 COPY --from=builder --chown=root:wheel /usr/lib64/libpgplot.so  /usr/lib64/libpgplot.so
 
 # Now install a bunch of Yum packages, not the devel versions.
-RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/rocky*
-RUN sed -i 's|#baseurl=|baseurl=|g' /etc/yum.repos.d/rocky*
+#RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/rocky*
+# RUN sed -i 's|#baseurl=|baseurl=|g' /etc/yum.repos.d/rocky*
+RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/almalinux*
+RUN sed -i 's|#baseurl=|baseurl=|g' /etc/yum.repos.d/almalinux*
+
 RUN echo "[main]" >> /etc/yum.conf && echo "timeout=90" >> /etc/yum.conf
 RUN yum update -y
 RUN sed -i '/tsflags=nodocs/d' /etc/yum.conf && \
