@@ -26,20 +26,23 @@ FROM rockylinux:9 AS builder
 
 # Install necessary dev packages from YUM, in alphabetical order
 WORKDIR /etc/yum.repos.d/
-RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/rocky*
-# RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/almalinux*
-RUN sed -i 's|#baseurl=|baseurl=|g' /etc/yum.repos.d/rocky*
+RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/rocky* &&\
+    sed -i 's|#baseurl=|baseurl=|g' /etc/yum.repos.d/rocky*
 #RUN sed -i 's|#baseurl=|baseurl=|g' /etc/yum.repos.d/almalinux*
+# RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/almalinux*
 
 RUN echo "[main]" >> /etc/yum.conf && echo "timeout=90" >> /etc/yum.conf
-RUN yum -y install dnf epel-release
-RUN yum update -y
-RUN dnf install -y epel-release 
+RUN yum -y install dnf epel-release &&\
+    yum update -y &&\
+    yum clean all
 
-RUN dnf config-manager --enable epel &&\
+RUN dnf install -y epel-release &&\
+    dnf config-manager --enable epel &&\
     dnf install yum-utils -y &&\
     dnf config-manager --set-enabled crb &&\
-    dnf update -y
+    dnf update -y &&\
+    dnf clean all
+RUN echo "[main]" >> /etc/dnf/dnf.conf && echo "timeout=90" >> /etc/dnf/dnf.conf
 
 # Should this be in another image (we build weekly) that we just "from" ?
 RUN dnf install -y --enablerepo=crb \
@@ -98,14 +101,14 @@ ENV FTOOLS=$ASTROPFX/ftools
 RUN mkdir -p $FTOOLS
 
 # /etc/yum.repos.d/heasoft-6.35/
-WORKDIR heasoft-6.35/BUILD_DIR
+WORKDIR /etc/yum.repos.d/heasoft-6.35/BUILD_DIR
 RUN ./configure --prefix=$FTOOLS CFLAGS=-fpic --enable-collapse --with-components="heacore tcltk attitude heatools Xspec ftools "
 RUN ./hmake &&\
     ./hmake install &&\
     chmod -R g+rwx $ASTROPFX/ftools
 
-WORKDIR ../../
-# /etc/yum.repos.d/
+# WORKDIR ../../
+WORKDIR /etc/yum.repos.d/
 
 # Tempo 
 # COPY setup_tempo.sh $HOME/setup_tempo.sh
@@ -143,9 +146,12 @@ ENV MINIFORGE_FILE=""
 RUN curl -s -L -O "${MINIFORGE_URL}/Miniforge3-Linux-$(uname -m).sh" &&\
     bash "Miniforge3-Linux-$(uname -m).sh" -b -p ${CONDAPFX}
 
+RUN $CONDABIN config --set remote_connect_timeout_secs 60 &&\
+    $CONDABIN config --set remote_read_timeout_secs 60
+
 # setuptools<74
 RUN $CONDABIN install --channel conda-forge --yes "mamba>=0.23" su-exec "setuptools" tini
-RUN $MAMBA create --name fermi -c conda-forge -c fermi -c fermi/label/dev \
+RUN $MAMBA create --name fermi -c conda-forge -c fermi -c fermi/label/dev --yes \
   "astropy" \
   "fermitools==2.3.53" \
   fermitools-data \
@@ -209,8 +215,8 @@ COPY setup_tempo2.sh $HOME/setup_tempo2.sh
 RUN sh setup_tempo2.sh && rm setup_tempo2.sh
 
 # DS9
-RUN mkdir $ASTROPFX/bin
-RUN curl -s -L https://ds9.si.edu/download/source/ds9.8.6.tar.gz | tar zxv
+RUN mkdir $ASTROPFX/bin &&\
+    curl -s -L https://ds9.si.edu/download/source/ds9.8.6.tar.gz | tar zxv
 WORKDIR SAOImageDS9
 RUN unix/configure && make && cp bin/ds9 $ASTROPFX/bin/.
 WORKDIR ../
@@ -250,15 +256,14 @@ COPY --from=builder --chown=root:wheel $ASTROPFX/bin $ASTROPFX/bin
 COPY --from=builder --chown=root:wheel /usr/lib64/libpgplot.so  /usr/lib64/libpgplot.so
 
 # Now install a bunch of Yum packages, not the devel versions.
-#RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/rocky*
-# RUN sed -i 's|#baseurl=|baseurl=|g' /etc/yum.repos.d/rocky*
-RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/almalinux*
-RUN sed -i 's|#baseurl=|baseurl=|g' /etc/yum.repos.d/almalinux*
+RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/rocky* &&\
+    sed -i 's|#baseurl=|baseurl=|g' /etc/yum.repos.d/rocky*
+# RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/almalinux*
+# RUN sed -i 's|#baseurl=|baseurl=|g' /etc/yum.repos.d/almalinux*
 
-RUN echo "[main]" >> /etc/yum.conf && echo "timeout=90" >> /etc/yum.conf
-RUN yum update -y
-RUN sed -i '/tsflags=nodocs/d' /etc/yum.conf && \
-yum update -y 
+RUN echo "[main]" >> /etc/yum.conf && echo "timeout=90" >> /etc/yum.conf &&\
+    yum update -y
+RUN sed -i '/tsflags=nodocs/d' /etc/yum.conf 
 
 # While the package xorg-x11-apps is deprecated in Red Hat Enterprise Linux 9 (RHEL9), 
 # it is still available and can be installed on Rocky Linux 9 which is based on RHEL. 
@@ -268,7 +273,10 @@ RUN dnf install -y epel-release &&\
     dnf config-manager --enable epel &&\
     dnf install yum-utils -y &&\
     dnf config-manager --set-enabled crb &&\
-    dnf update -y
+    dnf update -y &&\
+    dnf clean all
+
+RUN echo "[main]" >> /etc/dnf/dnf.conf && echo "timeout=90" >> /etc/dnf/dnf.conf
 
 # Should this be in another image (we build weekly) that we just "from" ?
 RUN dnf install -y --enablerepo=crb \
@@ -318,8 +326,8 @@ RUN echo -e '%wheel        ALL=(ALL)       NOPASSWD: ALL\n\
 fermi        ALL=NOPASSWD: ALL\n\
 fermi ALL=NOPASSWD: /usr/bin/yum' >> /etc/sudoers
 
-RUN echo '/opt/anaconda/envs/fermi/lib' >> /etc/ld.so.conf.d/condalibs.conf
-RUN /opt/anaconda/bin/conda init bash
+RUN echo '/opt/anaconda/envs/fermi/lib' >> /etc/ld.so.conf.d/condalibs.conf &&\
+    /opt/anaconda/bin/conda init bash
 RUN sed -i '135,157d' "/opt/anaconda/envs/fermi/etc/conda/activate.d/activate_fermitools.sh"
 
 # The entrypoint script is very important. It is the starter script run
