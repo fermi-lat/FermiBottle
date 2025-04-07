@@ -20,9 +20,7 @@
 # 2027-05-31 (End of RHEL9 full support phase)
 FROM rockylinux:9 AS builder
 # FROM rockylinux/rockylinux:9.5-base AS builder
-#FROM rockylinux:9-minimal AS builder
 # FROM almalinux:minimal AS builder
-#FROM quay.io/condaforge/linux-anvil-cos7-x86_64 AS builder
 
 # Install necessary dev packages from YUM, in alphabetical order
 WORKDIR /etc/yum.repos.d/
@@ -105,7 +103,8 @@ WORKDIR /etc/yum.repos.d/heasoft-6.35/BUILD_DIR
 RUN ./configure --prefix=$FTOOLS CFLAGS=-fpic --enable-collapse --with-components="heacore tcltk attitude heatools Xspec ftools "
 RUN ./hmake &&\
     ./hmake install &&\
-    chmod -R g+rwx $ASTROPFX/ftools
+    chmod -R g+rwx $ASTROPFX/ftools &&\
+    ./hmake clean
 
 # WORKDIR ../../
 WORKDIR /etc/yum.repos.d/
@@ -146,8 +145,8 @@ ENV MINIFORGE_FILE=""
 RUN curl -s -L -O "${MINIFORGE_URL}/Miniforge3-Linux-$(uname -m).sh" &&\
     bash "Miniforge3-Linux-$(uname -m).sh" -b -p ${CONDAPFX}
 
-RUN $CONDABIN config --set remote_connect_timeout_secs 60 &&\
-    $CONDABIN config --set remote_read_timeout_secs 60
+RUN $CONDABIN config --set remote_connect_timeout_secs 150 &&\
+    $CONDABIN config --set remote_read_timeout_secs 150
 
 # setuptools<74
 RUN $CONDABIN install --channel conda-forge --yes "mamba>=0.23" su-exec "setuptools" tini
@@ -214,9 +213,10 @@ ENV TEMPO2=$ASTROPFX/tempo2/T2runtime
 COPY setup_tempo2.sh $HOME/setup_tempo2.sh
 RUN sh setup_tempo2.sh && rm setup_tempo2.sh
 
-# DS9
-RUN mkdir $ASTROPFX/bin &&\
-    curl -s -L https://ds9.si.edu/download/source/ds9.8.6.tar.gz | tar zxv
+# DS9 8.6
+# Keep DS9 this way, trying to merge the RUN(s) doesn't work in Azure.
+RUN mkdir $ASTROPFX/bin
+RUN curl --connect-timeout 150 -s -L https://ds9.si.edu/download/source/ds9.8.6.tar.gz | tar zxv
 WORKDIR SAOImageDS9
 RUN unix/configure && make && cp bin/ds9 $ASTROPFX/bin/.
 WORKDIR ../
@@ -227,8 +227,6 @@ WORKDIR ../
 
 # Copy build products into a new Container / layer, specifically Rcoky Linux 9
 FROM rockylinux:9
-# FROM rockylinux/rockylinux:9-minimal
-# FROM almalinux:minimal
 
 MAINTAINER "Fermi LAT Collaboration" "fermihelp@milkyway.gsfc.nasa.gov"
 
@@ -258,8 +256,6 @@ COPY --from=builder --chown=root:wheel /usr/lib64/libpgplot.so  /usr/lib64/libpg
 # Now install a bunch of Yum packages, not the devel versions.
 RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/rocky* &&\
     sed -i 's|#baseurl=|baseurl=|g' /etc/yum.repos.d/rocky*
-# RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/almalinux*
-# RUN sed -i 's|#baseurl=|baseurl=|g' /etc/yum.repos.d/almalinux*
 
 RUN echo "[main]" >> /etc/yum.conf && echo "timeout=90" >> /etc/yum.conf &&\
     yum update -y
