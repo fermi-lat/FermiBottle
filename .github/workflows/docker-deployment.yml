@@ -1,0 +1,45 @@
+name: Build and Push Docker image
+on:
+ push:
+    branches: [ master ]
+ paths-ignore:
+      - '**.md'
+      - .clang-format
+      - .dockerignore
+      - .gitignore
+      - docker-compose.yml
+      - Dockerfile
+  workflow_dispatch:
+
+
+jobs:
+  docker:
+    name: Push Docker image to Docker HUB
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            name/app
+          tags: |
+            type=semver,pattern={{major}}.{{minor}}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          file: docker/Dockerfile
+          context: .
+          push: false
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}

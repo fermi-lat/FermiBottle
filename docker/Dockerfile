@@ -19,17 +19,14 @@
 # https://www.centos.org/download/
 # 2027-05-31 (End of RHEL9 full support phase)
 FROM rockylinux:9 AS builder
-# FROM rockylinux/rockylinux:9.5-base AS builder
-# FROM almalinux:minimal AS builder
 
 # Install necessary dev packages from YUM, in alphabetical order
 WORKDIR /etc/yum.repos.d/
 RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/rocky* &&\
-    sed -i 's|#baseurl=|baseurl=|g' /etc/yum.repos.d/rocky*
-#RUN sed -i 's|#baseurl=|baseurl=|g' /etc/yum.repos.d/almalinux*
-# RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/almalinux*
+    sed -i 's|#baseurl=|baseurl=|g' /etc/yum.repos.d/rocky* &&\
+    echo "[main]" >> /etc/yum.conf && echo "timeout=90" >> /etc/yum.conf  && \
+    echo "[main]" >> /etc/dnf/dnf.conf && echo "timeout=90" >> /etc/dnf/dnf.conf
 
-RUN echo "[main]" >> /etc/yum.conf && echo "timeout=90" >> /etc/yum.conf
 RUN yum -y install dnf epel-release &&\
     yum update -y &&\
     yum clean all
@@ -40,7 +37,6 @@ RUN dnf install -y epel-release &&\
     dnf config-manager --set-enabled crb &&\
     dnf update -y &&\
     dnf clean all
-RUN echo "[main]" >> /etc/dnf/dnf.conf && echo "timeout=90" >> /etc/dnf/dnf.conf
 
 # Should this be in another image (we build weekly) that we just "from" ?
 RUN dnf install -y --enablerepo=crb \
@@ -87,7 +83,9 @@ rm -rf /var/cache/dnf
 # Create the astrosoft directory in /home. This will be our
 # install target for all astronomy software
 ENV ASTROPFX=/home/astrosoft
-RUN mkdir -p $ASTROPFX
+ENV FTOOLS=$ASTROPFX/ftools
+RUN mkdir -p $ASTROPFX &&\
+    mkdir -p $FTOOLS
 
 # Install Heasarc Ftools from nifty script. Note, we
 # must first copy the install script into the container
@@ -95,8 +93,6 @@ RUN mkdir -p $ASTROPFX
 ### Breaks tempo shell - SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 # Latest release 6.35 Mar 2025
 RUN curl -s -L https://heasarc.gsfc.nasa.gov/FTP/software/lheasoft/release/heasoft-6.35src_no_xspec_modeldata.tar.gz | tar zxv -o heasoft-6.35
-ENV FTOOLS=$ASTROPFX/ftools
-RUN mkdir -p $FTOOLS
 
 # /etc/yum.repos.d/heasoft-6.35/
 WORKDIR /etc/yum.repos.d/heasoft-6.35/BUILD_DIR
