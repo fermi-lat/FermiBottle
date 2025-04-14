@@ -1,16 +1,15 @@
-name: Build and Push Docker image
+name: Docker Image build
+
 on:
- push:
-    branches: [ master ]
- paths-ignore:
+  push:
+    branches: [ "master" ]
+    paths-ignore:
       - '**.md'
       - .clang-format
       - .dockerignore
       - .gitignore
       - docker-compose.yml
       - Dockerfile
-  workflow_dispatch:
-
 
 jobs:
   docker:
