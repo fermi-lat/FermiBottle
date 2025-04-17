@@ -209,6 +209,9 @@ ENV TEMPO2=$ASTROPFX/tempo2/T2runtime
 COPY setup_tempo2.sh $HOME/setup_tempo2.sh
 RUN sh setup_tempo2.sh && rm setup_tempo2.sh
 
+
+COPY entrypoint $HOME/entrypoint
+
 # DS9 8.6
 # Keep DS9 this way, trying to merge the RUN(s) doesn't work in Azure.
 RUN mkdir $ASTROPFX/bin
@@ -332,7 +335,11 @@ RUN sed -i '135,157d' "/opt/anaconda/envs/fermi/etc/conda/activate.d/activate_fe
 # Also the entrypoint will prepare the environment, create the new
 # user directory, source the ScienceTools and the Ftools, and give
 # The user a nice colorful shell.
-COPY entrypoint /opt/docker/bin/entrypoint
+# RUN pwd && ls -l   
+# RUN find / -name entrypoint
+
+COPY $HOME/entrypoint /opt/docker/bin/entrypoint
+RUN ls -l /opt/docker/bin/entrypoint
 ENTRYPOINT ["/opt/docker/bin/entrypoint"]
 
 ###############################################################################
