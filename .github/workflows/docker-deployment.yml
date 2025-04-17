@@ -52,6 +52,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           file: docker/Dockerfile
+          load: true
           context: .
           platforms: linux/amd64
           push: false
