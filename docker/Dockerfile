@@ -92,10 +92,10 @@ RUN mkdir -p $ASTROPFX &&\
 # before we can execute it, which is unfortunate.  heasoft-6.33.2
 ### Breaks tempo shell - SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 # Latest release 6.35 Mar 2025
-RUN curl -s -L https://heasarc.gsfc.nasa.gov/FTP/software/lheasoft/release/heasoft-6.35src_no_xspec_modeldata.tar.gz | tar zxv -o heasoft-6.35
+RUN curl -s -L https://heasarc.gsfc.nasa.gov/FTP/software/lheasoft/release/heasoft-6.35.1src_no_xspec_modeldata.tar.gz | tar zxv -o heasoft-6.35.1
 
 # /etc/yum.repos.d/heasoft-6.35/
-WORKDIR /etc/yum.repos.d/heasoft-6.35/BUILD_DIR
+WORKDIR /etc/yum.repos.d/heasoft-6.35.1/BUILD_DIR
 RUN ./configure --prefix=$FTOOLS CFLAGS=-fpic --enable-collapse --with-components="heacore tcltk attitude heatools Xspec ftools "
 RUN ./hmake &&\
     ./hmake install &&\
@@ -185,7 +185,7 @@ RUN $MAMBA create --name fermigbm -c conda-forge \
     jupyter_server \
     libpng \
     numpy \
-    scipy \
+    "scipy==1.14.1" \
     pip \
     basemap \
     "python=3.11.*" \
