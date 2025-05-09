@@ -12,7 +12,7 @@ The FermiBottle includes the following high level packages for high energy astro
 
 | Package                                                              | Version   | Conda Environment | Description |
 | -------                                                              | -------   | ----------------- | ----------------- |
-| [Fermitools](https://github.com/fermi-lat/Fermitools-conda/wiki)     | 2.4.7    | fermi             | Basic tools necessary to analyze Fermi data|
+| [Fermitools](https://github.com/fermi-lat/Fermitools-conda/wiki)     | 2.4.8    | fermi             | Basic tools necessary to analyze Fermi data|
 | [HEASoft](https://heasarc.gsfc.nasa.gov/lheasoft/)                   | 6.35.1    | -                 | FITS file manipulation and multi-mission X-ray data analysis|
 | [Fermipy](https://fermipy.readthedocs.io/en/latest/)                 | 1.4.0     | fermi             | Python package that facilitates analysis of LAT data with the Fermi Science Tools |
 | [3ML](https://github.com/threeml/threeML)                            | 2.4.3     | fermi             | Framework for multi-wavelength/multi-messenger analysis for astronomy/astrophysics|
