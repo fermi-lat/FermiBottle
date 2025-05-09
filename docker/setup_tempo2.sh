@@ -31,11 +31,11 @@ XLIB="/usr/X11R6/lib"
 CFITSIO="$(find $ASTROPFX/ftools/ -name "*linux*libc*" -type d )"
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$FERMIPFX/lib"
 mkdir -p $TEMPO2PFX
-# curl -s -L https://bitbucket.org/psrsoft/tempo2/downloads/tempo2-2018.02.1.tar.gz > tempo2.tar.gz
-curl -s -L https://bitbucket.org/psrsoft/tempo2/downloads/tempo2-2021.06.1.tar.gz > tempo2.tar.gz
+# https://bitbucket.org/psrsoft/tempo2/downloads/tempo2-2021.06.1.tar.gz > tempo2.tar.gz
+curl -s -L https://bitbucket.org/psrsoft/tempo2/downloads/tempo2-2023.05.1.tar.gz  > tempo2.tar.gz
 tar zxf tempo2.tar.gz
 rm -rf  tempo2.tar.gz
-cd tempo2-2021.06.1
+cd tempo2-2023.05.1
 cp -r T2runtime $TEMPO2PFX
 ./configure \
   F77=gfortran \
@@ -59,5 +59,5 @@ make install
 make plugins
 make plugins-install
 cd ../
-rm -rf tempo2-2021.06.1
+rm -rf tempo2-2023.05.1
 chmod -R g+rwx $TEMPO2PFX

@@ -102,15 +102,7 @@ RUN ./hmake &&\
     chmod -R g+rwx $ASTROPFX/ftools &&\
     ./hmake clean
 
-# WORKDIR ../../
-WORKDIR /etc/yum.repos.d/
-
-# Tempo 
-# COPY setup_tempo.sh $HOME/setup_tempo.sh
-# RUN sh $HOME/setup_tempo.sh && rm $HOME/setup_tempo.sh
-
-COPY setup_tempo.sh setup_tempo.sh
-RUN sh setup_tempo.sh && rm setup_tempo.sh
+# WORKDIR /etc/yum.repos.d/
 
 WORKDIR /
 # pgplot. This should really be its own script.
@@ -144,12 +136,11 @@ RUN curl -s -L -O "${MINIFORGE_URL}/Miniforge3-Linux-$(uname -m).sh" &&\
 RUN $CONDABIN config --set remote_connect_timeout_secs 150 &&\
     $CONDABIN config --set remote_read_timeout_secs 150
 
-# setuptools<74
 RUN $CONDABIN install --channel conda-forge --yes "mamba>=0.23" su-exec "setuptools" tini
-RUN $MAMBA create --name fermi -c conda-forge -c fermi -c fermi/label/dev --yes \
+
+# Build the fermi env
+RUN $MAMBA create --name fermi -c conda-forge  -c fermi --yes \
   "astropy" \
-  "fermitools==2.3.53" \
-  fermitools-data \
   gammapy \
   healpy \
   jupyter \
@@ -159,12 +150,20 @@ RUN $MAMBA create --name fermi -c conda-forge -c fermi -c fermi/label/dev --yes 
   "numpy" \
   "python==3.11.*" \
   "scipy" 
-  
+
+# Install JoeA's personal arm64 version of pyregion needed only for the bottle. 
+RUN  $CONDAPFX/envs/fermi/bin/pip3 install  https://anaconda.org/jasercion/pyregion/2.3.1.dev7+g501f368/download/pyregion-2.3.1.dev7+g501f368.tar.gz
+
+# Now we can install fermitools
+RUN $CONDABIN install  --name fermi -c conda-forge  -c fermi -c fermi/label/dev --yes \
+   "python==3.11.*" \
+   "fermitools==2.4.7" \
+   fermitools-data
 
 RUN sed -i '89,91d' ${CONDAPFX}/envs/fermi/etc/conda/activate.d/activate_fermitools.sh
 
-# Doesn't install it in the fermi env
-RUN  $CONDABIN install --name fermi https://anaconda.org/conda-forge/fermipy/1.3.1/download/noarch/fermipy-1.3.1-pyh89e64dd_2.conda
+# Didn't originally install in the fermi env
+RUN  $CONDABIN install --name fermi https://anaconda.org/conda-forge/fermipy/1.4.0/download/noarch/fermipy-1.4.0-pyh885dcc9_0.conda
 
 RUN $CONDAPFX/envs/fermi/bin/pip3 install pyds9 pint-pulsar \
      git+https://github.com/threeML/astromodels.git \
@@ -186,6 +185,7 @@ RUN $MAMBA create --name fermigbm -c conda-forge \
     libpng \
     numpy \
     "scipy==1.14.1" \
+    pandas \
     pip \
     basemap \
     "python=3.11.*" \
@@ -197,22 +197,25 @@ RUN $MAMBA clean -a --yes
 # Pull the latest version and make sure NOT to get it from pypi:
 RUN GEOS_DIR=${CONDAPFX}/envs/fermigbm/lib \
     $CONDAPFX/envs/fermigbm/bin/pip3 install \
-    --no-binary ":none"  git+https://github.com/USRA-STI/gdt-core.git@main \
-    --no-binary ":none"  git+https://github.com/USRA-STI/gdt-fermi.git@main \
-    'scipy>=1.14.0' 
+    astro-gdt-fermi 
+#    --no-binary ":none"  git+https://github.com/USRA-STI/gdt-core.git@main \
+#    --no-binary ":none"  git+https://github.com/USRA-STI/gdt-fermi.git@main \
+#    'scipy>=1.14.0' 
 
 # Fermitools prefix
 ENV FERMIPFX=$CONDAPFX/envs/fermi
+
+# Tempo 
+COPY setup_tempo.sh $HOME/setup_tempo.sh
+RUN sh setup_tempo.sh && rm setup_tempo.sh
 
 # Tempo2
 ENV TEMPO2=$ASTROPFX/tempo2/T2runtime
 COPY setup_tempo2.sh $HOME/setup_tempo2.sh
 RUN sh setup_tempo2.sh && rm setup_tempo2.sh
 
-
 COPY entrypoint $HOME/entrypoint
 
-# DS9 8.6
 # Keep DS9 this way, trying to merge the RUN(s) doesn't work in Azure.
 RUN mkdir $ASTROPFX/bin
 RUN curl --connect-timeout 150 -s -L https://ds9.si.edu/download/source/ds9.8.6.tar.gz | tar zxv
