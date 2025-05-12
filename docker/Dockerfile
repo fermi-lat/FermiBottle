@@ -157,7 +157,7 @@ RUN  $CONDAPFX/envs/fermi/bin/pip3 install  https://anaconda.org/jasercion/pyreg
 # Now we can install fermitools
 RUN $CONDABIN install  --name fermi -c conda-forge  -c fermi -c fermi/label/dev --yes \
    "python==3.11.*" \
-   "fermitools==2.4.8" \
+   "fermitools==2.4.9" \
    fermitools-data
 
 RUN sed -i '89,91d' ${CONDAPFX}/envs/fermi/etc/conda/activate.d/activate_fermitools.sh
