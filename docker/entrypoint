@@ -20,6 +20,7 @@ export USER=fermi
 export LOGNAME=fermi
 export MAIL=/var/spool/mail/fermi
 export HEADAS="$(find /home/astrosoft/ftools -type d -name $(uname -m)*)"
+export TEMPO=$ASTROPFX/tempo
 export TEMPO2=$HOME/astrosoft/tempo2/T2runtime
 export ASTROSOFT=$HOME/astrosoft
 export PATH=$ASTROSOFT:/opt/anaconda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
@@ -49,6 +50,7 @@ export LOGNAME=${LOGNAME}
 export MAIL=${MAIL}
 export ASTROSOFT=${ASTROSOFT}
 export HEADAS=${HEADAS}
+export TEMPO=${TEMPO}
 export TEMPO2=${TEMPO2}
 export PATH=${PATH}:\$PATH
 
