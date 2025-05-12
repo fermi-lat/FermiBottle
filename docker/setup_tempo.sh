@@ -8,6 +8,8 @@ cd tempo
 bash prepare
 ./configure --prefix=$TEMPO
 make && make install
+# Make sure help file gets copied..
+cp obsys.dat tempo.cfg tempo.hlp $TEMPO/bin/
 cd ../
 rm -rf tempo
 chmod -R g+rwx $TEMPO

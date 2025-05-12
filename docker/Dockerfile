@@ -206,6 +206,7 @@ RUN GEOS_DIR=${CONDAPFX}/envs/fermigbm/lib \
 ENV FERMIPFX=$CONDAPFX/envs/fermi
 
 # Tempo 
+ENV TEMPO=$ASTROPFX/tempo
 COPY setup_tempo.sh $HOME/setup_tempo.sh
 RUN sh setup_tempo.sh && rm setup_tempo.sh
 
