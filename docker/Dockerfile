@@ -342,7 +342,7 @@ RUN sed -i '135,157d' "/opt/anaconda/envs/fermi/etc/conda/activate.d/activate_fe
 # RUN pwd && ls -l   
 # RUN find / -name entrypoint
 
-COPY $HOME/entrypoint /opt/docker/bin/entrypoint
+COPY entrypoint /opt/docker/bin/entrypoint
 RUN ls -l /opt/docker/bin/entrypoint
 ENTRYPOINT ["/opt/docker/bin/entrypoint"]
 
