@@ -152,7 +152,7 @@ RUN $MAMBA create --name fermi -c conda-forge  -c fermi --yes \
   "scipy" 
 
 # Install JoeA's personal arm64 version of pyregion needed only for the bottle. 
-RUN  $CONDAPFX/envs/fermi/bin/pip3 install  https://anaconda.org/jasercion/pyregion/2.3.1.dev7+g501f368/download/pyregion-2.3.1.dev7+g501f368.tar.gz
+RUN  $CONDAPFX/envs/fermi/bin/pip3 install aplpy  https://anaconda.org/jasercion/pyregion/2.3.1.dev7+g501f368/download/pyregion-2.3.1.dev7+g501f368.tar.gz
 
 # Now we can install fermitools
 RUN $CONDABIN install  --name fermi -c conda-forge  -c fermi -c fermi/label/dev --yes \

@@ -36,6 +36,14 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Generate Tag
+        id: generate-tag
+        run: |
+          DATE=$(date +%Y-%m-%d)
+          ARCH=$(uname -m)
+          TAG="my-image:${DATE}_${ARCH}"
+          echo "::set-output name=tag::${TAG}"
+
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v5
@@ -53,7 +61,6 @@ jobs:
         with:
           file: docker/Dockerfile
           load: true
-          context: .
           platforms: linux/amd64
           push: false
           tags: ${{ steps.meta.outputs.tags }}
