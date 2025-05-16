@@ -149,7 +149,7 @@ RUN $MAMBA create --name fermi -c conda-forge  -c fermi --yes \
   "matplotlib" \
   "numpy" \
   "python==3.11.*" \
-  "scipy" 
+  "scipy<1.14"
 
 # Install JoeA's personal arm64 version of pyregion needed only for the bottle. 
 RUN  $CONDAPFX/envs/fermi/bin/pip3 install aplpy  https://anaconda.org/jasercion/pyregion/2.3.1.dev7+g501f368/download/pyregion-2.3.1.dev7+g501f368.tar.gz
