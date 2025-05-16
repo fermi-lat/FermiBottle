@@ -37,6 +37,6 @@ jobs:
           context: .
           load: true
           file: docker/Dockerfile
-          platforms: linux/amd64
+          platforms: linux/arm64
           push: false
           tags: user/app:latest
