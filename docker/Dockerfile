@@ -155,9 +155,9 @@ RUN $MAMBA create --name fermi -c conda-forge  -c fermi --yes \
 RUN  $CONDAPFX/envs/fermi/bin/pip3 install aplpy  https://anaconda.org/jasercion/pyregion/2.3.1.dev7+g501f368/download/pyregion-2.3.1.dev7+g501f368.tar.gz
 
 # Now we can install fermitools
-RUN $CONDABIN install  --name fermi -c conda-forge  -c fermi -c fermi/label/dev --yes \
+RUN $CONDABIN install  --name fermi -c conda-forge  -c fermi --yes \
    "python==3.11.*" \
-   "fermitools==2.4.9" \
+   "fermitools==2.5.0" \
    fermitools-data
 
 RUN sed -i '89,91d' ${CONDAPFX}/envs/fermi/etc/conda/activate.d/activate_fermitools.sh
@@ -207,15 +207,15 @@ ENV FERMIPFX=$CONDAPFX/envs/fermi
 
 # Tempo 
 ENV TEMPO=$ASTROPFX/tempo
-COPY setup_tempo.sh $HOME/setup_tempo.sh
+COPY docker/setup_tempo.sh $HOME/setup_tempo.sh
 RUN sh setup_tempo.sh && rm setup_tempo.sh
 
 # Tempo2
 ENV TEMPO2=$ASTROPFX/tempo2/T2runtime
-COPY setup_tempo2.sh $HOME/setup_tempo2.sh
+COPY docker/setup_tempo2.sh $HOME/setup_tempo2.sh
 RUN sh setup_tempo2.sh && rm setup_tempo2.sh
 
-COPY entrypoint $HOME/entrypoint
+COPY docker/entrypoint $HOME/entrypoint
 
 # Keep DS9 this way, trying to merge the RUN(s) doesn't work in Azure.
 RUN mkdir $ASTROPFX/bin
