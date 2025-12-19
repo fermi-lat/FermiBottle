@@ -50,3 +50,6 @@ jobs:
           platforms: linux/arm64
           push: false
           tags: user/app:latest
+          # Caching helps speed up subsequent builds
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
