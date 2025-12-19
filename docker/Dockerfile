@@ -91,11 +91,11 @@ RUN mkdir -p $ASTROPFX &&\
 # must first copy the install script into the container
 # before we can execute it, which is unfortunate.  heasoft-6.33.2
 ### Breaks tempo shell - SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-# Latest release 6.35 Mar 2025
-RUN curl -s -L https://heasarc.gsfc.nasa.gov/FTP/software/lheasoft/release/heasoft-6.35.1src_no_xspec_modeldata.tar.gz | tar zxv -o heasoft-6.35.1
+# Latest release 6.36 Dec 2025
+RUN curl -s -L https://heasarc.gsfc.nasa.gov/FTP/software/lheasoft/release/heasoft-6.36src_no_xspec_modeldata.tar.gz | tar zxv -o heasoft-6.36
 
-# /etc/yum.repos.d/heasoft-6.35/
-WORKDIR /etc/yum.repos.d/heasoft-6.35.1/BUILD_DIR
+# /etc/yum.repos.d/heasoft-6.36/
+WORKDIR /etc/yum.repos.d/heasoft-6.36/BUILD_DIR
 RUN ./configure --prefix=$FTOOLS CFLAGS=-fpic --enable-collapse --with-components="heacore tcltk attitude heatools Xspec ftools "
 RUN ./hmake &&\
     ./hmake install &&\
@@ -157,7 +157,7 @@ RUN  $CONDAPFX/envs/fermi/bin/pip3 install aplpy  https://anaconda.org/jasercion
 # Now we can install fermitools
 RUN $CONDABIN install  --name fermi -c conda-forge  -c fermi --yes \
    "python==3.11.*" \
-   "fermitools==2.5.0" \
+   "fermitools==2.5.1" \
    fermitools-data
 
 RUN sed -i '89,91d' ${CONDAPFX}/envs/fermi/etc/conda/activate.d/activate_fermitools.sh
@@ -207,15 +207,15 @@ ENV FERMIPFX=$CONDAPFX/envs/fermi
 
 # Tempo 
 ENV TEMPO=$ASTROPFX/tempo
-COPY docker/setup_tempo.sh $HOME/setup_tempo.sh
+COPY setup_tempo.sh $HOME/setup_tempo.sh
 RUN sh setup_tempo.sh && rm setup_tempo.sh
 
 # Tempo2
 ENV TEMPO2=$ASTROPFX/tempo2/T2runtime
-COPY docker/setup_tempo2.sh $HOME/setup_tempo2.sh
+COPY setup_tempo2.sh $HOME/setup_tempo2.sh
 RUN sh setup_tempo2.sh && rm setup_tempo2.sh
 
-COPY docker/entrypoint $HOME/entrypoint
+COPY entrypoint $HOME/entrypoint
 
 # Keep DS9 this way, trying to merge the RUN(s) doesn't work in Azure.
 RUN mkdir $ASTROPFX/bin
