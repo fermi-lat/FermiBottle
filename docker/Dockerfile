@@ -207,15 +207,15 @@ ENV FERMIPFX=$CONDAPFX/envs/fermi
 
 # Tempo 
 ENV TEMPO=$ASTROPFX/tempo
-COPY setup_tempo.sh $HOME/setup_tempo.sh
+COPY setup_tempo.sh .
 RUN sh setup_tempo.sh && rm setup_tempo.sh
 
 # Tempo2
 ENV TEMPO2=$ASTROPFX/tempo2/T2runtime
-COPY setup_tempo2.sh $HOME/setup_tempo2.sh
+COPY setup_tempo2.sh .
 RUN sh setup_tempo2.sh && rm setup_tempo2.sh
 
-COPY entrypoint $HOME/entrypoint
+COPY entrypoint .
 
 # Keep DS9 this way, trying to merge the RUN(s) doesn't work in Azure.
 RUN mkdir $ASTROPFX/bin
