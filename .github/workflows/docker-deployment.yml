@@ -51,7 +51,7 @@ jobs:
         with:
           context: ./docker 
           load: true
-          file: ./docker/Dockerfile
+          file: Dockerfile
           platforms: linux/arm64
           push: false
           tags: user/app:latest
