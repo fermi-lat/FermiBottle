@@ -208,11 +208,12 @@ ENV HOME=/home/fermi
 
 RUN mkdir -p $HOME
 
-RUN pwd && ls -l
+RUN echo "JSA EP docker" &&\ 
+    pwd && ls -l
 
 # Tempo 
 ENV TEMPO=$ASTROPFX/tempo
-COPY setup_tempo.sh $HOME/setup_tempo.sh
+COPY docker/setup_tempo.sh $HOME/setup_tempo.sh
 RUN sh $HOME/setup_tempo.sh && rm $HOME/setup_tempo.sh
 
 # Tempo2
@@ -345,7 +346,8 @@ RUN sed -i '135,157d' "/opt/anaconda/envs/fermi/etc/conda/activate.d/activate_fe
 # Also the entrypoint will prepare the environment, create the new
 # user directory, source the ScienceTools and the Ftools, and give
 # The user a nice colorful shell.
-RUN pwd && ls -l   && \ 
+RUN echo "Last EP docker" &&\
+    pwd && ls -l   && \ 
     find / -name entrypoint  && \
     ls -l $HOME  && \
 
