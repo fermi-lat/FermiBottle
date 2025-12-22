@@ -204,18 +204,21 @@ RUN GEOS_DIR=${CONDAPFX}/envs/fermigbm/lib \
 
 # Fermitools prefix
 ENV FERMIPFX=$CONDAPFX/envs/fermi
+ENV HOME=/home/fermi/
+
+RUN mkdir -p $HOME
 
 # Tempo 
 ENV TEMPO=$ASTROPFX/tempo
-COPY setup_tempo.sh .
-RUN sh setup_tempo.sh && rm setup_tempo.sh
+COPY setup_tempo.sh $HOME/setup_tempo.sh
+RUN sh $HOME/setup_tempo.sh && rm $HOME/setup_tempo.sh
 
 # Tempo2
 ENV TEMPO2=$ASTROPFX/tempo2/T2runtime
-COPY setup_tempo2.sh .
-RUN sh setup_tempo2.sh && rm setup_tempo2.sh
+COPY setup_tempo2.sh  $HOME/setup_tempo2.sh
+RUN sh $HOME/setup_tempo2.sh && rm $HOME/setup_tempo2.sh
 
-COPY entrypoint .
+COPY entrypoint $HOME/entrypoint
 
 # Keep DS9 this way, trying to merge the RUN(s) doesn't work in Azure.
 RUN mkdir $ASTROPFX/bin
