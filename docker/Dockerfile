@@ -208,6 +208,8 @@ ENV HOME=/home/fermi
 
 RUN mkdir -p $HOME
 
+RUN pwd && ls -l
+
 # Tempo 
 ENV TEMPO=$ASTROPFX/tempo
 COPY setup_tempo.sh $HOME/setup_tempo.sh
@@ -218,6 +220,7 @@ ENV TEMPO2=$ASTROPFX/tempo2/T2runtime
 COPY setup_tempo2.sh  $HOME/setup_tempo2.sh
 RUN sh $HOME/setup_tempo2.sh && rm $HOME/setup_tempo2.sh
 
+RUN sh pwd && ls -l
 COPY entrypoint $HOME/entrypoint
 
 # Keep DS9 this way, trying to merge the RUN(s) doesn't work in Azure.
