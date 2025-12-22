@@ -204,7 +204,7 @@ RUN GEOS_DIR=${CONDAPFX}/envs/fermigbm/lib \
 
 # Fermitools prefix
 ENV FERMIPFX=$CONDAPFX/envs/fermi
-ENV HOME=/home/fermi/
+ENV HOME=/home/fermi
 
 RUN mkdir -p $HOME
 
@@ -342,9 +342,9 @@ RUN sed -i '135,157d' "/opt/anaconda/envs/fermi/etc/conda/activate.d/activate_fe
 # Also the entrypoint will prepare the environment, create the new
 # user directory, source the ScienceTools and the Ftools, and give
 # The user a nice colorful shell.
-RUN pwd && ls -l   
-RUN find / -name entrypoint
-RUN ls -l $HOME
+RUN pwd && ls -l   && \ 
+    find / -name entrypoint  && \
+    ls -l $HOME  && \
 
 COPY entrypoint /opt/docker/bin/entrypoint
 RUN ls -l /opt/docker/bin/entrypoint
