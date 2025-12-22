@@ -49,12 +49,12 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          context: ./docker 
           load: true
-          # file: Dockerfile
+          file: ./docker/Dockerfile
           platforms: linux/arm64
           push: false
           tags: user/app:latest
           # Caching helps speed up subsequent builds
           # cache-from: type=gha
           # cache-to: type=gha,mode=max
+          # context: ./docker
