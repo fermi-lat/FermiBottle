@@ -342,8 +342,9 @@ RUN sed -i '135,157d' "/opt/anaconda/envs/fermi/etc/conda/activate.d/activate_fe
 # Also the entrypoint will prepare the environment, create the new
 # user directory, source the ScienceTools and the Ftools, and give
 # The user a nice colorful shell.
-# RUN pwd && ls -l   
-# RUN find / -name entrypoint
+RUN pwd && ls -l   
+RUN find / -name entrypoint
+RUN ls -l $HOME
 
 COPY entrypoint /opt/docker/bin/entrypoint
 RUN ls -l /opt/docker/bin/entrypoint
