@@ -218,11 +218,11 @@ RUN sh $HOME/setup_tempo.sh && rm $HOME/setup_tempo.sh
 
 # Tempo2
 ENV TEMPO2=$ASTROPFX/tempo2/T2runtime
-COPY setup_tempo2.sh  $HOME/setup_tempo2.sh
+COPY docker/setup_tempo2.sh  $HOME/setup_tempo2.sh
 RUN sh $HOME/setup_tempo2.sh && rm $HOME/setup_tempo2.sh
 
 RUN sh pwd && ls -l
-COPY entrypoint $HOME/entrypoint
+COPY docker/entrypoint $HOME/entrypoint
 
 # Keep DS9 this way, trying to merge the RUN(s) doesn't work in Azure.
 RUN mkdir $ASTROPFX/bin
@@ -349,7 +349,7 @@ RUN sed -i '135,157d' "/opt/anaconda/envs/fermi/etc/conda/activate.d/activate_fe
 RUN echo "Last EP docker" &&\
     pwd && ls -l   && \ 
     find / -name entrypoint  && \
-    ls -l $HOME  && \
+    ls -l $HOME  
 
 COPY entrypoint /opt/docker/bin/entrypoint
 RUN ls -l /opt/docker/bin/entrypoint
