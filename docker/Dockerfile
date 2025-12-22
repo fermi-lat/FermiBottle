@@ -250,6 +250,8 @@ CMD [ "/bin/bash" ]
 
 # Prepary the Environment of the new Container
 ENV ASTROPFX=/home/astrosoft
+ENV HOME=/home/fermi
+
 RUN mkdir -p $ASTROPFX
 
 # Copy all the important stuff from the builder into the final product.
@@ -351,7 +353,7 @@ RUN echo "Last EP docker" &&\
     find / -name entrypoint  && \
     ls -l $HOME  
 
-COPY entrypoint /opt/docker/bin/entrypoint
+COPY --from=builder $HOME/entrypoint /opt/docker/bin/entrypoint
 RUN ls -l /opt/docker/bin/entrypoint
 ENTRYPOINT ["/opt/docker/bin/entrypoint"]
 
