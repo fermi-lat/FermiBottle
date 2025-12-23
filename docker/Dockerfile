@@ -87,23 +87,6 @@ ENV FTOOLS=$ASTROPFX/ftools
 RUN mkdir -p $ASTROPFX &&\
     mkdir -p $FTOOLS
 
-# Install Heasarc Ftools from nifty script. Note, we
-# must first copy the install script into the container
-# before we can execute it, which is unfortunate.  heasoft-6.33.2
-### Breaks tempo shell - SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-# Latest release 6.36 Dec 2025
-RUN curl -s -L https://heasarc.gsfc.nasa.gov/FTP/software/lheasoft/release/heasoft-6.36src_no_xspec_modeldata.tar.gz | tar zxv -o heasoft-6.36
-
-# /etc/yum.repos.d/heasoft-6.36/
-WORKDIR /etc/yum.repos.d/heasoft-6.36/BUILD_DIR
-RUN ./configure --prefix=$FTOOLS CFLAGS=-fpic --enable-collapse --with-components="heacore tcltk attitude heatools Xspec ftools "
-RUN ./hmake &&\
-    ./hmake install &&\
-    chmod -R g+rwx $ASTROPFX/ftools &&\
-    ./hmake clean
-
-# WORKDIR /etc/yum.repos.d/
-
 WORKDIR /
 # pgplot. This should really be its own script.
 # Do that JSA 03 2025
