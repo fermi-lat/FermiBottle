@@ -271,8 +271,11 @@ RUN dnf install -y epel-release &&\
 RUN echo "[main]" >> /etc/dnf/dnf.conf && echo "timeout=90" >> /etc/dnf/dnf.conf
 
 # Should this be in another image (we build weekly) that we just "from" ?
+# Installing Python 3.11 since 3.12 is the default
 RUN dnf install -y --enablerepo=crb \
   bzip2 \
+  python3.11 \
+  python3.11-pip \
   dejavu-lgc-sans-fonts \
   emacs \
   gcc \
@@ -318,6 +321,7 @@ RUN echo -e '%wheel        ALL=(ALL)       NOPASSWD: ALL\n\
 fermi        ALL=NOPASSWD: ALL\n\
 fermi ALL=NOPASSWD: /usr/bin/yum' >> /etc/sudoers
 
+# Uses Py3.12
 RUN echo '/opt/anaconda/envs/fermi/lib' >> /etc/ld.so.conf.d/condalibs.conf &&\
     /opt/anaconda/bin/conda init bash
 RUN sed -i '135,157d' "/opt/anaconda/envs/fermi/etc/conda/activate.d/activate_fermitools.sh"
