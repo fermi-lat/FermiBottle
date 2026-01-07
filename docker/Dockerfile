@@ -87,6 +87,23 @@ ENV FTOOLS=$ASTROPFX/ftools
 RUN mkdir -p $ASTROPFX &&\
     mkdir -p $FTOOLS
 
+# Install Heasarc Ftools from nifty script. Note, we
+# must first copy the install script into the container
+# before we can execute it, which is unfortunate.  heasoft-6.33.2
+### Breaks tempo shell - SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+# Latest release 6.36 Dec 2025
+RUN curl -s -L https://heasarc.gsfc.nasa.gov/FTP/software/lheasoft/release/heasoft-6.36src_no_xspec_modeldata.tar.gz | tar zxv -o heasoft-6.36
+
+# /etc/yum.repos.d/heasoft-6.36/
+WORKDIR /etc/yum.repos.d/heasoft-6.36/BUILD_DIR
+RUN ./configure --prefix=$FTOOLS CFLAGS=-fpic --enable-collapse --with-components="heacore tcltk attitude heatools Xspec ftools "
+RUN ./hmake &&\
+    ./hmake install &&\
+    chmod -R g+rwx $ASTROPFX/ftools &&\
+    ./hmake clean
+
+# WORKDIR /etc/yum.repos.d/
+
 WORKDIR /
 # pgplot. This should really be its own script.
 # Do that JSA 03 2025
@@ -140,7 +157,7 @@ RUN  $CONDAPFX/envs/fermi/bin/pip3 install aplpy  https://anaconda.org/jasercion
 # Now we can install fermitools
 RUN $CONDABIN install  --name fermi -c conda-forge  -c fermi --yes \
    "python==3.11.*" \
-   "fermitools==2.5.1" \
+   "fermitools==2.5.*" \
    fermitools-data
 
 RUN sed -i '89,91d' ${CONDAPFX}/envs/fermi/etc/conda/activate.d/activate_fermitools.sh
@@ -191,22 +208,18 @@ ENV HOME=/home/fermi
 
 RUN mkdir -p $HOME
 
-RUN echo "JSA EP docker" &&\ 
-    pwd && ls -l
-
 # Tempo 
 ENV TEMPO=$ASTROPFX/tempo
-COPY docker/setup_tempo.sh $HOME/setup_tempo.sh
-# COPY setup_tempo.sh $HOME/setup_tempo.sh
+COPY setup_tempo.sh $HOME/setup_tempo.sh
 RUN sh $HOME/setup_tempo.sh && rm $HOME/setup_tempo.sh
 
 # Tempo2
 ENV TEMPO2=$ASTROPFX/tempo2/T2runtime
-COPY docker/setup_tempo2.sh  $HOME/setup_tempo2.sh
+COPY setup_tempo2.sh  $HOME/setup_tempo2.sh
 RUN sh $HOME/setup_tempo2.sh && rm $HOME/setup_tempo2.sh
 
-# RUN pwd && ls -l
-COPY docker/entrypoint $HOME/entrypoint
+RUN sh pwd && ls -l
+COPY entrypoint $HOME/entrypoint
 
 # Keep DS9 this way, trying to merge the RUN(s) doesn't work in Azure.
 RUN mkdir $ASTROPFX/bin
@@ -233,9 +246,9 @@ VOLUME ["/data"]
 CMD [ "/bin/bash" ]
 
 # Prepary the Environment of the new Container
-ENV ASTROPFX=/home/astrosoft
 ENV HOME=/home/fermi
 
+ENV ASTROPFX=/home/astrosoft
 RUN mkdir -p $ASTROPFX
 
 # Copy all the important stuff from the builder into the final product.
@@ -271,11 +284,8 @@ RUN dnf install -y epel-release &&\
 RUN echo "[main]" >> /etc/dnf/dnf.conf && echo "timeout=90" >> /etc/dnf/dnf.conf
 
 # Should this be in another image (we build weekly) that we just "from" ?
-# Installing Python 3.11 since 3.12 is the default
 RUN dnf install -y --enablerepo=crb \
   bzip2 \
-  python3.11 \
-  python3.11-pip \
   dejavu-lgc-sans-fonts \
   emacs \
   gcc \
@@ -321,9 +331,8 @@ RUN echo -e '%wheel        ALL=(ALL)       NOPASSWD: ALL\n\
 fermi        ALL=NOPASSWD: ALL\n\
 fermi ALL=NOPASSWD: /usr/bin/yum' >> /etc/sudoers
 
-# Uses Py3.12
 RUN echo '/opt/anaconda/envs/fermi/lib' >> /etc/ld.so.conf.d/condalibs.conf &&\
-    /opt/anaconda/bin/conda init bash
+    sudo /opt/anaconda/bin/conda init bash
 RUN sed -i '135,157d' "/opt/anaconda/envs/fermi/etc/conda/activate.d/activate_fermitools.sh"
 
 # The entrypoint script is very important. It is the starter script run
@@ -336,10 +345,8 @@ RUN sed -i '135,157d' "/opt/anaconda/envs/fermi/etc/conda/activate.d/activate_fe
 # Also the entrypoint will prepare the environment, create the new
 # user directory, source the ScienceTools and the Ftools, and give
 # The user a nice colorful shell.
-RUN echo "Last EP docker" &&\
-    pwd && ls -l   && \ 
-    find / -name entrypoint  && \
-    ls -l $HOME  
+RUN pwd && ls -l   && \ 
+    find / -name entrypoint  
 
 COPY --from=builder $HOME/entrypoint /opt/docker/bin/entrypoint
 RUN ls -l /opt/docker/bin/entrypoint
