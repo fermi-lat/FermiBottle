@@ -1,6 +1,6 @@
 # FermiBottle DockerFile
 # maintained by the FSSC
-# Author: Alex Reustle
+# Author: Alex Reustle / Jim Amrhein (2025-)
 #
 # This is a two stage dockerfile building the fermi science tools
 # and related software in a builder container, then copying
@@ -235,7 +235,8 @@ WORKDIR ../
 # Copy build products into a new Container / layer, specifically Rcoky Linux 9
 FROM rockylinux:9
 
-MAINTAINER "Fermi LAT Collaboration" "fermihelp@milkyway.gsfc.nasa.gov"
+# MAINTAINER "Fermi LAT Collaboration" "fermihelp@milkyway.gsfc.nasa.gov"
+LABEL org.opencontainers.image.authors="fermihelp@milkyway.gsfc.nasa.gov"
 
 # This is the default location of the shared directoy.
 VOLUME ["/data"]
@@ -331,8 +332,9 @@ RUN echo -e '%wheel        ALL=(ALL)       NOPASSWD: ALL\n\
 fermi        ALL=NOPASSWD: ALL\n\
 fermi ALL=NOPASSWD: /usr/bin/yum' >> /etc/sudoers
 
-RUN echo '/opt/anaconda/envs/fermi/lib' >> /etc/ld.so.conf.d/condalibs.conf &&\
-    sudo /opt/anaconda/bin/conda init bash
+RUN echo '/opt/anaconda/envs/fermi/lib' >> /etc/ld.so.conf.d/condalibs.conf 
+# &&\
+#    sudo /opt/anaconda/bin/conda init bash
 RUN sed -i '135,157d' "/opt/anaconda/envs/fermi/etc/conda/activate.d/activate_fermitools.sh"
 
 # The entrypoint script is very important. It is the starter script run
@@ -345,8 +347,8 @@ RUN sed -i '135,157d' "/opt/anaconda/envs/fermi/etc/conda/activate.d/activate_fe
 # Also the entrypoint will prepare the environment, create the new
 # user directory, source the ScienceTools and the Ftools, and give
 # The user a nice colorful shell.
-RUN pwd && ls -l   && \ 
-    find / -name entrypoint  
+# RUN pwd && ls -l   && \ 
+#    find / -name entrypoint  
 
 COPY --from=builder $HOME/entrypoint /opt/docker/bin/entrypoint
 RUN ls -l /opt/docker/bin/entrypoint
