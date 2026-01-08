@@ -155,15 +155,15 @@ RUN $MAMBA create --name fermi -c conda-forge  -c fermi --yes \
 RUN  $CONDAPFX/envs/fermi/bin/pip3 install aplpy  https://anaconda.org/jasercion/pyregion/2.3.1.dev7+g501f368/download/pyregion-2.3.1.dev7+g501f368.tar.gz
 
 # Now we can install fermitools
-RUN $CONDABIN install  --name fermi -c conda-forge  -c fermi --yes \
+RUN $MAMBA install  --name fermi -c conda-forge  -c fermi --yes \
    "python==3.11.*" \
    "fermitools==2.5.*" \
-   fermitools-data
+   "fermitools-data"
 
 RUN sed -i '89,91d' ${CONDAPFX}/envs/fermi/etc/conda/activate.d/activate_fermitools.sh
 
 # Didn't originally install in the fermi env
-RUN  $CONDABIN install --name fermi https://anaconda.org/conda-forge/fermipy/1.4.0/download/noarch/fermipy-1.4.0-pyh885dcc9_0.conda
+RUN  $MAMBA install --name fermi https://anaconda.org/conda-forge/fermipy/1.4.0/download/noarch/fermipy-1.4.0-pyh885dcc9_0.conda
 
 RUN $CONDAPFX/envs/fermi/bin/pip3 install pyds9 pint-pulsar \
      git+https://github.com/threeML/astromodels.git \
