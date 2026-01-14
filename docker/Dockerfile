@@ -18,28 +18,30 @@
 # into another centos:9 container at the end of the script.
 # https://www.centos.org/download/
 # 2027-05-31 (End of RHEL9 full support phase)
-FROM rockylinux:9 AS builder
+FROM rockylinux:9-minimal AS builder
 
-# Install necessary dev packages from YUM, in alphabetical order
-WORKDIR /etc/yum.repos.d/
-RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/rocky* &&\
-    sed -i 's|#baseurl=|baseurl=|g' /etc/yum.repos.d/rocky* &&\
-    echo "[main]" >> /etc/yum.conf && echo "timeout=90" >> /etc/yum.conf  && \
-    echo "[main]" >> /etc/dnf/dnf.conf && echo "timeout=90" >> /etc/dnf/dnf.conf
+RUN microdnf update -y &&\
+    microdnf install dnf -y &&\
+    microdnf clean all 
 
-RUN yum -y install dnf epel-release &&\
-    yum update -y &&\
-    yum clean all
 
-RUN dnf install -y epel-release &&\
+# Using yum's replacement DNF now.
+RUN dnf install -y epel-release  &&\
     dnf config-manager --enable epel &&\
-    dnf install yum-utils -y &&\
+    dnf install yum-utils -y  &&\
     dnf config-manager --set-enabled crb &&\
     dnf update -y &&\
     dnf clean all
 
+# Install necessary dev packages from YUM/DNF, in alphabetical order
+WORKDIR /etc/yum.repos.d/
+RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/rocky* &&\
+    sed -i 's|#baseurl=|baseurl=|g' /etc/yum.repos.d/rocky* &&\
+    echo "[main]" >> /etc/yum.conf && echo "timeout=300" >> /etc/yum.conf  && \
+    echo "[main]" >> /etc/dnf/dnf.conf && echo "timeout=300" >> /etc/dnf/dnf.conf
+
 # Should this be in another image (we build weekly) that we just "from" ?
-RUN dnf install -y --enablerepo=crb \
+RUN dnf install -y --enablerepo=crb --setopt=install_weak_deps=False \
   autoconf \
   automake \
   bzip2-devel \
@@ -102,6 +104,7 @@ RUN ./hmake &&\
     chmod -R g+rwx $ASTROPFX/ftools &&\
     ./hmake clean
 
+# Do we clean up /etc/yum.repos.d/heasoft-6.36/
 # WORKDIR /etc/yum.repos.d/
 
 WORKDIR /
@@ -130,15 +133,20 @@ ENV MAMBA_ROOT_PREFIX=${CONDAPFX}
 
 ENV MINIFORGE_URL="https://github.com/conda-forge/miniforge/releases/latest/download"
 ENV MINIFORGE_FILE=""
+
+# Install miniforge; set timeouts and install a few pkgs
 RUN curl -s -L -O "${MINIFORGE_URL}/Miniforge3-Linux-$(uname -m).sh" &&\
-    bash "Miniforge3-Linux-$(uname -m).sh" -b -p ${CONDAPFX}
+    bash "Miniforge3-Linux-$(uname -m).sh" -b -p ${CONDAPFX} &&\
+    $CONDABIN config --set remote_connect_timeout_secs 500 &&\
+    $CONDABIN config --set remote_read_timeout_secs 500 &&\
+    $CONDABIN install --channel conda-forge --yes "mamba>=0.23" su-exec "setuptools" tini
 
-RUN $CONDABIN config --set remote_connect_timeout_secs 150 &&\
-    $CONDABIN config --set remote_read_timeout_secs 150
-
-RUN $CONDABIN install --channel conda-forge --yes "mamba>=0.23" su-exec "setuptools" tini
-
+#  && $MAMBA clean -afy
 # Build the fermi env
+# RUN $MAMBA create -n fermi  heasoft \
+#     -c https://heasarc.gsfc.nasa.gov/FTP/software/conda/ \
+#    -c conda-forge
+
 RUN $MAMBA create --name fermi -c conda-forge  -c fermi --yes \
   "astropy" \
   gammapy \
@@ -149,31 +157,28 @@ RUN $MAMBA create --name fermi -c conda-forge  -c fermi --yes \
   "matplotlib" \
   "numpy" \
   "python==3.11.*" \
-  "scipy<1.14"
-
-# Install JoeA's personal arm64 version of pyregion needed only for the bottle. 
-RUN  $CONDAPFX/envs/fermi/bin/pip3 install aplpy  https://anaconda.org/jasercion/pyregion/2.3.1.dev7+g501f368/download/pyregion-2.3.1.dev7+g501f368.tar.gz
+  "scipy<1.14" \
+  &&  $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir aplpy  https://anaconda.org/jasercion/pyregion/2.3.1.dev7+g501f368/download/pyregion-2.3.1.dev7+g501f368.tar.gz
 
 # Now we can install fermitools
 RUN $MAMBA install  --name fermi -c conda-forge  -c fermi --yes \
    "python==3.11.*" \
    "fermitools==2.5.*" \
-   "fermitools-data"
-
-RUN sed -i '89,91d' ${CONDAPFX}/envs/fermi/etc/conda/activate.d/activate_fermitools.sh
+   "fermitools-data" \
+   &&  sed -i '89,91d' ${CONDAPFX}/envs/fermi/etc/conda/activate.d/activate_fermitools.sh
 
 # Didn't originally install in the fermi env
-RUN  $MAMBA install --name fermi https://anaconda.org/conda-forge/fermipy/1.4.0/download/noarch/fermipy-1.4.0-pyh885dcc9_0.conda
+RUN  $MAMBA install --name fermi https://anaconda.org/conda-forge/fermipy/1.4.0/download/noarch/fermipy-1.4.0-pyh885dcc9_0.conda 
+# && $MAMBA clean -afy
 
-RUN $CONDAPFX/envs/fermi/bin/pip3 install pyds9 pint-pulsar \
+RUN $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir pyds9 pint-pulsar \
      git+https://github.com/threeML/astromodels.git \
-     git+https://github.com/threeML/threeML.git 
-
-RUN rm -rf ${CONDAPFX}/pkgs/* &&\
-    chmod -R g+rwx ${CONDAPFX}
+     git+https://github.com/threeML/threeML.git \
+     && rm -rf ${CONDAPFX}/pkgs/* &&\
+     chmod -R g+rwx ${CONDAPFX}
 
 ########################
-RUN $MAMBA create --name fermigbm -c conda-forge \
+RUN $MAMBA create --name fermigbm -c conda-forge --yes \
     astropy \
     basemap-data \
     basemap-data-hires \
@@ -188,15 +193,16 @@ RUN $MAMBA create --name fermigbm -c conda-forge \
     pandas \
     pip \
     basemap \
-    "python=3.11.*" \
-    --yes
+    "python=3.11.*" 
+    # && $MAMBA clean -afy
 
 # Hoping to recover space from fermi and fermigdm creations
 RUN $MAMBA clean -a --yes
+# RUN $MAMBA clean -afy
 
 # Pull the latest version and make sure NOT to get it from pypi:
 RUN GEOS_DIR=${CONDAPFX}/envs/fermigbm/lib \
-    $CONDAPFX/envs/fermigbm/bin/pip3 install \
+    $CONDAPFX/envs/fermigbm/bin/pip3 install --no-cache-dir \
     astro-gdt-fermi 
 #    --no-binary ":none"  git+https://github.com/USRA-STI/gdt-core.git@main \
 #    --no-binary ":none"  git+https://github.com/USRA-STI/gdt-fermi.git@main \
@@ -206,7 +212,8 @@ RUN GEOS_DIR=${CONDAPFX}/envs/fermigbm/lib \
 ENV FERMIPFX=$CONDAPFX/envs/fermi
 ENV HOME=/home/fermi
 
-RUN mkdir -p $HOME
+RUN mkdir -p $HOME  &&\
+    mkdir $ASTROPFX/bin
 
 # Tempo 
 ENV TEMPO=$ASTROPFX/tempo
@@ -222,8 +229,8 @@ RUN sh pwd && ls -l
 COPY entrypoint $HOME/entrypoint
 
 # Keep DS9 this way, trying to merge the RUN(s) doesn't work in Azure.
-RUN mkdir $ASTROPFX/bin
-RUN curl --connect-timeout 150 -s -L https://ds9.si.edu/download/source/ds9.8.6.tar.gz | tar zxv
+# RUN mkdir $ASTROPFX/bin
+RUN curl --connect-timeout 300 -s -L https://ds9.si.edu/download/source/ds9.8.6.tar.gz | tar zxv
 WORKDIR SAOImageDS9
 RUN unix/configure && make && cp bin/ds9 $ASTROPFX/bin/.
 WORKDIR ../
@@ -275,7 +282,7 @@ RUN sed -i '/tsflags=nodocs/d' /etc/yum.conf
 # it is still available and can be installed on Rocky Linux 9 which is based on RHEL. 
 # RUN dnf install xorg-x11-apps
  
-RUN dnf install -y epel-release &&\
+RUN dnf install -y epel-release  &&\
     dnf config-manager --enable epel &&\
     dnf install yum-utils -y &&\
     dnf config-manager --set-enabled crb &&\
@@ -285,7 +292,7 @@ RUN dnf install -y epel-release &&\
 RUN echo "[main]" >> /etc/dnf/dnf.conf && echo "timeout=90" >> /etc/dnf/dnf.conf
 
 # Should this be in another image (we build weekly) that we just "from" ?
-RUN dnf install -y --enablerepo=crb \
+RUN dnf install -y --enablerepo=crb --setopt=install_weak_deps=False \
   bzip2 \
   dejavu-lgc-sans-fonts \
   emacs \
