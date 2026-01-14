@@ -31,7 +31,7 @@ jobs:
       - name: Checkout FermiBottle repository
         uses: actions/checkout@v4
         with:
-          path: FermiBottle # Clones to $GITHUB_WORKSPACE/FermiBottle
+          path: $GITHUB_WORKSPACE/FermiBottle # Clones to $GITHUB_WORKSPACE/FermiBottle
 
       - name: Run tests from ScienceTools against FermiBottle
         uses: actions/checkout@v4
@@ -63,11 +63,11 @@ jobs:
       - name: Build and TEST
         uses: docker/build-push-action@v6
         with:
-          context: ./docker
+          context: $GITHUB_WORKSPACE/FermiBottle/docker
           load: true
           push: false
           tags: ${{ env.TEST_TAG }}
-          file: ./docker/Dockerfile
+          # file: ./docker/Dockerfile
 
       - name: Test
         run: |
