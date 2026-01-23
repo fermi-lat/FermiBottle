@@ -18,27 +18,26 @@
 # into another centos:9 container at the end of the script.
 # https://www.centos.org/download/
 # 2027-05-31 (End of RHEL9 full support phase)
-FROM rockylinux:9-minimal AS builder
+FROM rockylinux/rockylinux:10.1-minimal AS builder
 
 RUN microdnf update -y &&\
     microdnf install dnf -y &&\
-    microdnf clean all 
+    microdnf clean all
 
+# Install necessary dev packages from YUM, in alphabetical order
+# WORKDIR /etc/yum.repos.d/
+RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/rocky* &&\
+    sed -i 's|#baseurl=|baseurl=|g' /etc/yum.repos.d/rocky* &&\
+    echo "[main]" >> /etc/yum.conf && echo "timeout=300" >> /etc/yum.conf  && \
+    echo "[main]" >> /etc/dnf/dnf.conf && echo "timeout=300" >> /etc/dnf/dnf.conf
 
-# Using yum's replacement DNF now.
+# --setopt=install_weak_deps=False
 RUN dnf install -y epel-release  &&\
     dnf config-manager --enable epel &&\
     dnf install yum-utils -y  &&\
     dnf config-manager --set-enabled crb &&\
     dnf update -y &&\
     dnf clean all
-
-# Install necessary dev packages from YUM/DNF, in alphabetical order
-WORKDIR /etc/yum.repos.d/
-RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/rocky* &&\
-    sed -i 's|#baseurl=|baseurl=|g' /etc/yum.repos.d/rocky* &&\
-    echo "[main]" >> /etc/yum.conf && echo "timeout=300" >> /etc/yum.conf  && \
-    echo "[main]" >> /etc/dnf/dnf.conf && echo "timeout=300" >> /etc/dnf/dnf.conf
 
 # Should this be in another image (we build weekly) that we just "from" ?
 RUN dnf install -y --enablerepo=crb --setopt=install_weak_deps=False \
@@ -87,17 +86,21 @@ rm -rf /var/cache/dnf
 ENV ASTROPFX=/home/astrosoft
 ENV FTOOLS=$ASTROPFX/ftools
 RUN mkdir -p $ASTROPFX &&\
-    mkdir -p $FTOOLS
+    mkdir -p $FTOOLS &&\
+    mkdir -p /usr/local/heasoft
+
 
 # Install Heasarc Ftools from nifty script. Note, we
 # must first copy the install script into the container
 # before we can execute it, which is unfortunate.  heasoft-6.33.2
 ### Breaks tempo shell - SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 # Latest release 6.36 Dec 2025
+
+WORKDIR /usr/local/heasoft
 RUN curl -s -L https://heasarc.gsfc.nasa.gov/FTP/software/lheasoft/release/heasoft-6.36src_no_xspec_modeldata.tar.gz | tar zxv -o heasoft-6.36
 
 # /etc/yum.repos.d/heasoft-6.36/
-WORKDIR /etc/yum.repos.d/heasoft-6.36/BUILD_DIR
+WORKDIR /usr/local/heasoft/heasoft-6.36/BUILD_DIR
 RUN ./configure --prefix=$FTOOLS CFLAGS=-fpic --enable-collapse --with-components="heacore tcltk attitude heatools Xspec ftools "
 RUN ./hmake &&\
     ./hmake install &&\
@@ -108,22 +111,6 @@ RUN ./hmake &&\
 # WORKDIR /etc/yum.repos.d/
 
 WORKDIR /
-# pgplot. This should really be its own script.
-# Do that JSA 03 2025
-RUN curl -s -L ftp://ftp.astro.caltech.edu/pub/pgplot/pgplot5.2.tar.gz > pgplot5.2.tar.gz &&\
- tar zxvf pgplot5.2.tar.gz &&\
- rm -rf /pgplot5.2.tar.gz &&\
- mkdir -p $ASTROPFX/pgplot &&\
- cd $ASTROPFX/pgplot &&\
- cp /pgplot/drivers.list . &&\
- sed -i -e '71s/!/ /g' drivers.list &&\
- sed -i -e '72s/!/ /g' drivers.list &&\
- /pgplot/makemake /pgplot linux g77_gcc &&\
- sed -i -e 's/^FCOMPL=g77/FCOMPL=gfortran/g' makefile &&\
- make && make cpg && make clean &&\
- chmod -R g+rwx $ASTROPFX/pgplot &&\
- cp $ASTROPFX/pgplot/libpgplot.so /usr/lib64/ &&\
- rm -rf /pgplot
 
 # Anaconda Fermitools, and other conda packages
 ENV CONDAPFX=/opt/anaconda
@@ -133,23 +120,20 @@ ENV MAMBA_ROOT_PREFIX=${CONDAPFX}
 
 ENV MINIFORGE_URL="https://github.com/conda-forge/miniforge/releases/latest/download"
 ENV MINIFORGE_FILE=""
-
-# Install miniforge; set timeouts and install a few pkgs
 RUN curl -s -L -O "${MINIFORGE_URL}/Miniforge3-Linux-$(uname -m).sh" &&\
-    bash "Miniforge3-Linux-$(uname -m).sh" -b -p ${CONDAPFX} &&\
-    $CONDABIN config --set remote_connect_timeout_secs 500 &&\
-    $CONDABIN config --set remote_read_timeout_secs 500 &&\
-    $CONDABIN install --channel conda-forge --yes "mamba>=0.23" su-exec "setuptools" tini
+    bash "Miniforge3-Linux-$(uname -m).sh" -b -p ${CONDAPFX}
 
-#  && $MAMBA clean -afy
+RUN $CONDABIN config --set remote_connect_timeout_secs 500 &&\
+    $CONDABIN config --set remote_read_timeout_secs 500
+
+RUN $CONDABIN install --channel conda-forge --yes "mamba>=0.23" su-exec "setuptools" tini
+
 # Build the fermi env
-# RUN $MAMBA create -n fermi  heasoft \
-#     -c https://heasarc.gsfc.nasa.gov/FTP/software/conda/ \
-#    -c conda-forge
-
 RUN $MAMBA create --name fermi -c conda-forge  -c fermi --yes \
   "astropy" \
   gammapy \
+  pgplot \
+  tempo2 \
   healpy \
   jupyter \
   jupyter_server \
@@ -157,15 +141,20 @@ RUN $MAMBA create --name fermi -c conda-forge  -c fermi --yes \
   "matplotlib" \
   "numpy" \
   "python==3.11.*" \
-  "scipy<1.14" \
-  &&  $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir aplpy  https://anaconda.org/jasercion/pyregion/2.3.1.dev7+g501f368/download/pyregion-2.3.1.dev7+g501f368.tar.gz
+  "scipy<1.14" 
+#  && $MAMBA clean -afy
+
+# Install JoeA's personal arm64 version of pyregion needed only for the bottle. 
+RUN  $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir aplpy  https://anaconda.org/jasercion/pyregion/2.3.1.dev7+g501f368/download/pyregion-2.3.1.dev7+g501f368.tar.gz
 
 # Now we can install fermitools
 RUN $MAMBA install  --name fermi -c conda-forge  -c fermi --yes \
    "python==3.11.*" \
    "fermitools==2.5.*" \
-   "fermitools-data" \
-   &&  sed -i '89,91d' ${CONDAPFX}/envs/fermi/etc/conda/activate.d/activate_fermitools.sh
+   "fermitools-data" 
+# && $MAMBA  clean -afy
+
+RUN sed -i '89,91d' ${CONDAPFX}/envs/fermi/etc/conda/activate.d/activate_fermitools.sh
 
 # Didn't originally install in the fermi env
 RUN  $MAMBA install --name fermi https://anaconda.org/conda-forge/fermipy/1.4.0/download/noarch/fermipy-1.4.0-pyh885dcc9_0.conda 
@@ -173,9 +162,11 @@ RUN  $MAMBA install --name fermi https://anaconda.org/conda-forge/fermipy/1.4.0/
 
 RUN $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir pyds9 pint-pulsar \
      git+https://github.com/threeML/astromodels.git \
-     git+https://github.com/threeML/threeML.git \
-     && rm -rf ${CONDAPFX}/pkgs/* &&\
-     chmod -R g+rwx ${CONDAPFX}
+     git+https://github.com/threeML/threeML.git 
+
+# RUN $MAMBA clean -afy
+RUN rm -rf ${CONDAPFX}/pkgs/* &&\
+    chmod -R g+rwx ${CONDAPFX}
 
 ########################
 RUN $MAMBA create --name fermigbm -c conda-forge --yes \
@@ -184,6 +175,7 @@ RUN $MAMBA create --name fermigbm -c conda-forge --yes \
     basemap-data-hires \
     cfitsio \
     geos \
+    tempo2 \
     healpy \
     jupyter \
     jupyter_server \
@@ -197,7 +189,7 @@ RUN $MAMBA create --name fermigbm -c conda-forge --yes \
     # && $MAMBA clean -afy
 
 # Hoping to recover space from fermi and fermigdm creations
-RUN $MAMBA clean -a --yes
+# RUN $MAMBA clean -a --yes
 # RUN $MAMBA clean -afy
 
 # Pull the latest version and make sure NOT to get it from pypi:
@@ -220,17 +212,13 @@ ENV TEMPO=$ASTROPFX/tempo
 COPY setup_tempo.sh $HOME/setup_tempo.sh
 RUN sh $HOME/setup_tempo.sh && rm $HOME/setup_tempo.sh
 
-# Tempo2
-ENV TEMPO2=$ASTROPFX/tempo2/T2runtime
-COPY setup_tempo2.sh  $HOME/setup_tempo2.sh
-RUN sh $HOME/setup_tempo2.sh && rm $HOME/setup_tempo2.sh
-
 RUN sh pwd && ls -l
 COPY entrypoint $HOME/entrypoint
 
 # Keep DS9 this way, trying to merge the RUN(s) doesn't work in Azure.
+# This gives us the LATEST version of the code vs the older conda version :  01/2026 JSA 
 # RUN mkdir $ASTROPFX/bin
-RUN curl --connect-timeout 300 -s -L https://ds9.si.edu/download/source/ds9.8.6.tar.gz | tar zxv
+RUN curl --connect-timeout 300 -s -L https://ds9.si.edu/download/source/ds9.8.7b3.tar.gz | tar zxv
 WORKDIR SAOImageDS9
 RUN unix/configure && make && cp bin/ds9 $ASTROPFX/bin/.
 WORKDIR ../
@@ -240,13 +228,17 @@ WORKDIR ../
 ##########################################################################
 
 # Copy build products into a new Container / layer, specifically Rcoky Linux 9
-FROM rockylinux:9
+FROM rockylinux/rockylinux:10.1-minimal
 
 # MAINTAINER "Fermi LAT Collaboration" "fermihelp@milkyway.gsfc.nasa.gov"
 LABEL org.opencontainers.image.authors="fermihelp@milkyway.gsfc.nasa.gov"
 
 # This is the default location of the shared directoy.
 VOLUME ["/data"]
+
+RUN microdnf update -y &&\
+    microdnf install dnf -y &&\
+    microdnf clean all
 
 # This is the default command that docker will run if no other command is
 # specified, that's fine because we want it to just drop into a bash shell,
@@ -264,18 +256,18 @@ RUN mkdir -p $ASTROPFX
 COPY --from=builder --chown=root:wheel /opt/anaconda /opt/anaconda
 COPY --from=builder --chown=root:wheel $ASTROPFX/ftools $ASTROPFX/ftools
 COPY --from=builder --chown=root:wheel $ASTROPFX/tempo $ASTROPFX/tempo
-COPY --from=builder --chown=root:wheel $ASTROPFX/pgplot $ASTROPFX/pgplot
-COPY --from=builder --chown=root:wheel $ASTROPFX/tempo2 $ASTROPFX/tempo2
+# COPY --from=builder --chown=root:wheel $ASTROPFX/pgplot $ASTROPFX/pgplot
+# COPY --from=builder --chown=root:wheel $ASTROPFX/tempo2 $ASTROPFX/tempo2
 COPY --from=builder --chown=root:wheel $ASTROPFX/bin $ASTROPFX/bin
 ### COPY --from=builder --chown=root:wheel $ASTROPFX/.gammaray_data_tools $ASTROPFX/.gammaray_data_tools
-COPY --from=builder --chown=root:wheel /usr/lib64/libpgplot.so  /usr/lib64/libpgplot.so
+# COPY --from=builder --chown=root:wheel /usr/lib64/libpgplot.so  /usr/lib64/libpgplot.so
 
 # Now install a bunch of Yum packages, not the devel versions.
 RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/rocky* &&\
     sed -i 's|#baseurl=|baseurl=|g' /etc/yum.repos.d/rocky*
 
 RUN echo "[main]" >> /etc/yum.conf && echo "timeout=90" >> /etc/yum.conf &&\
-    yum update -y
+    dnf update -y
 RUN sed -i '/tsflags=nodocs/d' /etc/yum.conf 
 
 # While the package xorg-x11-apps is deprecated in Red Hat Enterprise Linux 9 (RHEL9), 
@@ -291,14 +283,14 @@ RUN dnf install -y epel-release  &&\
 
 RUN echo "[main]" >> /etc/dnf/dnf.conf && echo "timeout=90" >> /etc/dnf/dnf.conf
 
+# Remove compilers from FINAL image:   gcc \ gcc-c++ \  gcc-gfortran \  make \
+
+
 # Should this be in another image (we build weekly) that we just "from" ?
 RUN dnf install -y --enablerepo=crb --setopt=install_weak_deps=False \
   bzip2 \
   dejavu-lgc-sans-fonts \
   emacs \
-  gcc \
-  gcc-c++ \
-  gcc-gfortran \
   gedit \
   git \
   libpng \
@@ -311,7 +303,6 @@ RUN dnf install -y --enablerepo=crb --setopt=install_weak_deps=False \
   libXpm \
   libXrender \
   libXt \
-  make \
   mesa-libGL \
   ncurses\
   openssl \
@@ -329,7 +320,6 @@ RUN dnf install -y --enablerepo=crb --setopt=install_weak_deps=False \
   wget \
   which \
   zlib-devel && \
-yum clean all && \
 dnf clean all && \
 rm -rf /var/cache/dnf 
 
@@ -337,7 +327,7 @@ rm -rf /var/cache/dnf
 # Redundantly also give this access to the fermi user
 RUN echo -e '%wheel        ALL=(ALL)       NOPASSWD: ALL\n\
 fermi        ALL=NOPASSWD: ALL\n\
-fermi ALL=NOPASSWD: /usr/bin/yum' >> /etc/sudoers
+fermi ALL=NOPASSWD: /usr/bin/dnf' >> /etc/sudoers
 
 RUN echo '/opt/anaconda/envs/fermi/lib' >> /etc/ld.so.conf.d/condalibs.conf 
 # &&\
