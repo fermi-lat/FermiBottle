@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.4
 # FermiBottle DockerFile
 # maintained by the FSSC
 # Author: Alex Reustle / Jim Amrhein (2025-)
@@ -22,14 +23,16 @@ FROM rockylinux/rockylinux:10.1-minimal AS builder
 
 RUN microdnf update -y &&\
     microdnf install dnf -y &&\
-    microdnf clean all
+    microdnf clean all &&\
+    mkdir -p /home/fermi/.cache/pip
 
 # Install necessary dev packages from YUM, in alphabetical order
 # WORKDIR /etc/yum.repos.d/
 RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/rocky* &&\
     sed -i 's|#baseurl=|baseurl=|g' /etc/yum.repos.d/rocky* &&\
     echo "[main]" >> /etc/yum.conf && echo "timeout=300" >> /etc/yum.conf  && \
-    echo "[main]" >> /etc/dnf/dnf.conf && echo "timeout=300" >> /etc/dnf/dnf.conf
+    echo "[main]" >> /etc/dnf/dnf.conf && echo "timeout=300" >> /etc/dnf/dnf.conf &&\
+    dnf --disablerepo=epel -y update  ca-certificates
 
 # --setopt=install_weak_deps=False
 RUN dnf install -y epel-release  &&\
@@ -97,15 +100,15 @@ RUN mkdir -p $ASTROPFX &&\
 # Latest release 6.36 Dec 2025
 
 WORKDIR /usr/local/heasoft
-RUN curl -s -L https://heasarc.gsfc.nasa.gov/FTP/software/lheasoft/release/heasoft-6.36src_no_xspec_modeldata.tar.gz | tar zxv -o heasoft-6.36
+# RUN curl -s -L https://heasarc.gsfc.nasa.gov/FTP/software/lheasoft/release/heasoft-6.36src_no_xspec_modeldata.tar.gz | tar zxv -o heasoft-6.36
 
 # /etc/yum.repos.d/heasoft-6.36/
-WORKDIR /usr/local/heasoft/heasoft-6.36/BUILD_DIR
-RUN ./configure --prefix=$FTOOLS CFLAGS=-fpic --enable-collapse --with-components="heacore tcltk attitude heatools Xspec ftools "
-RUN ./hmake &&\
-    ./hmake install &&\
-    chmod -R g+rwx $ASTROPFX/ftools &&\
-    ./hmake clean
+# WORKDIR /usr/local/heasoft/heasoft-6.36/BUILD_DIR
+# RUN ./configure --prefix=$FTOOLS CFLAGS=-fpic --enable-collapse --with-components="heacore tcltk attitude heatools Xspec ftools "
+#RUN ./hmake &&\
+#    ./hmake install &&\
+#    chmod -R g+rwx $ASTROPFX/ftools &&\
+#    ./hmake clean
 
 # Do we clean up /etc/yum.repos.d/heasoft-6.36/
 # WORKDIR /etc/yum.repos.d/
@@ -145,7 +148,7 @@ RUN $MAMBA create --name fermi -c conda-forge  -c fermi --yes \
 #  && $MAMBA clean -afy
 
 # Install JoeA's personal arm64 version of pyregion needed only for the bottle. 
-RUN  $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir aplpy  https://anaconda.org/jasercion/pyregion/2.3.1.dev7+g501f368/download/pyregion-2.3.1.dev7+g501f368.tar.gz
+RUN --mount=type=cache,target=/home/fermi/.cache/pip  $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir aplpy  https://anaconda.org/jasercion/pyregion/2.3.1.dev7+g501f368/download/pyregion-2.3.1.dev7+g501f368.tar.gz
 
 # Now we can install fermitools
 RUN $MAMBA install  --name fermi -c conda-forge  -c fermi --yes \
@@ -160,22 +163,23 @@ RUN sed -i '89,91d' ${CONDAPFX}/envs/fermi/etc/conda/activate.d/activate_fermito
 RUN  $MAMBA install --name fermi https://anaconda.org/conda-forge/fermipy/1.4.0/download/noarch/fermipy-1.4.0-pyh885dcc9_0.conda 
 # && $MAMBA clean -afy
 
-RUN $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir pyds9 pint-pulsar \
-     git+https://github.com/threeML/astromodels.git \
-     git+https://github.com/threeML/threeML.git 
+RUN --mount=type=cache,target=/home/fermi/.cache/pip $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir pyds9 
+# pint-pulsar \
+#     git+https://github.com/threeML/astromodels.git \
+#     git+https://github.com/threeML/threeML.git 
 
 # RUN $MAMBA clean -afy
 RUN rm -rf ${CONDAPFX}/pkgs/* &&\
     chmod -R g+rwx ${CONDAPFX}
 
 ########################
+# # tempo2 \
 RUN $MAMBA create --name fermigbm -c conda-forge --yes \
     astropy \
     basemap-data \
     basemap-data-hires \
     cfitsio \
     geos \
-    tempo2 \
     healpy \
     jupyter \
     jupyter_server \
@@ -192,6 +196,15 @@ RUN $MAMBA create --name fermigbm -c conda-forge --yes \
 # RUN $MAMBA clean -a --yes
 # RUN $MAMBA clean -afy
 
+# Fermitools prefix
+ENV FERMIPFX=$CONDAPFX/envs/fermi
+ENV HOME=/home/fermi
+    
+RUN mkdir -p $HOME  &&\
+    mkdir $ASTROPFX/bin &&\
+    mkdir -p $HOME/.cache/pip
+
+
 # Pull the latest version and make sure NOT to get it from pypi:
 RUN GEOS_DIR=${CONDAPFX}/envs/fermigbm/lib \
     $CONDAPFX/envs/fermigbm/bin/pip3 install --no-cache-dir \
@@ -200,17 +213,11 @@ RUN GEOS_DIR=${CONDAPFX}/envs/fermigbm/lib \
 #    --no-binary ":none"  git+https://github.com/USRA-STI/gdt-fermi.git@main \
 #    'scipy>=1.14.0' 
 
-# Fermitools prefix
-ENV FERMIPFX=$CONDAPFX/envs/fermi
-ENV HOME=/home/fermi
-
-RUN mkdir -p $HOME  &&\
-    mkdir $ASTROPFX/bin
 
 # Tempo 
-ENV TEMPO=$ASTROPFX/tempo
-COPY setup_tempo.sh $HOME/setup_tempo.sh
-RUN sh $HOME/setup_tempo.sh && rm $HOME/setup_tempo.sh
+# ENV TEMPO=$ASTROPFX/tempo
+# COPY setup_tempo.sh $HOME/setup_tempo.sh
+# RUN sh $HOME/setup_tempo.sh && rm $HOME/setup_tempo.sh
 
 RUN sh pwd && ls -l
 COPY entrypoint $HOME/entrypoint
@@ -238,7 +245,7 @@ VOLUME ["/data"]
 
 RUN microdnf update -y &&\
     microdnf install dnf -y &&\
-    microdnf clean all
+    microdnf clean all 
 
 # This is the default command that docker will run if no other command is
 # specified, that's fine because we want it to just drop into a bash shell,
@@ -249,13 +256,14 @@ CMD [ "/bin/bash" ]
 ENV HOME=/home/fermi
 
 ENV ASTROPFX=/home/astrosoft
-RUN mkdir -p $ASTROPFX
+RUN mkdir -p $ASTROPFX &&\
+    mkdir -p $HOME/.cache/pip
 
 # Copy all the important stuff from the builder into the final product.
 # Also, set the permissions to give the wheel group ownership.
 COPY --from=builder --chown=root:wheel /opt/anaconda /opt/anaconda
-COPY --from=builder --chown=root:wheel $ASTROPFX/ftools $ASTROPFX/ftools
-COPY --from=builder --chown=root:wheel $ASTROPFX/tempo $ASTROPFX/tempo
+# COPY --from=builder --chown=root:wheel $ASTROPFX/ftools $ASTROPFX/ftools
+# COPY --from=builder --chown=root:wheel $ASTROPFX/tempo $ASTROPFX/tempo
 # COPY --from=builder --chown=root:wheel $ASTROPFX/pgplot $ASTROPFX/pgplot
 # COPY --from=builder --chown=root:wheel $ASTROPFX/tempo2 $ASTROPFX/tempo2
 COPY --from=builder --chown=root:wheel $ASTROPFX/bin $ASTROPFX/bin
@@ -284,7 +292,8 @@ RUN dnf install -y epel-release  &&\
 RUN echo "[main]" >> /etc/dnf/dnf.conf && echo "timeout=90" >> /etc/dnf/dnf.conf
 
 # Remove compilers from FINAL image:   gcc \ gcc-c++ \  gcc-gfortran \  make \
-
+# perl \
+# perl-ExtUtils-MakeMaker \
 
 # Should this be in another image (we build weekly) that we just "from" ?
 RUN dnf install -y --enablerepo=crb --setopt=install_weak_deps=False \
@@ -293,6 +302,7 @@ RUN dnf install -y --enablerepo=crb --setopt=install_weak_deps=False \
   emacs \
   gedit \
   git \
+  hostname \
   libpng \
   libSM \
   libX11 \
@@ -307,8 +317,6 @@ RUN dnf install -y --enablerepo=crb --setopt=install_weak_deps=False \
   ncurses\
   openssl \
   patch \
-  perl \
-  perl-ExtUtils-MakeMaker \
   readline\
   shadow-utils\
   sqlite \

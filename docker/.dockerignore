@@ -1,5 +1,16 @@
 .git
+.gitignore
 __pycache__
 *.pyc
 *.pyo
 *.pyd
+
+dist
+build
+target
+*.cache
+
+# Logs and sensitive files
+*.log
+.env
+.aws/
