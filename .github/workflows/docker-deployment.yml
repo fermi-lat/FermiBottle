@@ -17,7 +17,7 @@ on:
         default: 'warning'
 
 env:
-  TEST_TAG: fssc/fermibottle_lite:$(date +'%Y.%m.%d')
+  TEST_TAG: fssc/fermibottle_lite:2026.02.09
   LATEST_TAG: fermi-lat/fermibottle2026:latest
 
 jobs:
