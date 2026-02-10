@@ -9,11 +9,9 @@
 #
 # Build instructions are split variously across separate install
 # scripts, or continuous RUN lines.
-
 ##########################################################################
 #                             Start Builder
 ##########################################################################
-
 # Use Centos 9 as our base. Name the builder container builder.
 # This container will be thrown away once its contents are copied
 # into another centos:9 container at the end of the script.
@@ -100,7 +98,7 @@ RUN mkdir -p $ASTROPFX &&\
 # Latest release 6.36 Dec 2025
 
 WORKDIR /usr/local/heasoft
-# RUN curl -s -L https://heasarc.gsfc.nasa.gov/FTP/software/lheasoft/release/heasoft-6.36src_no_xspec_modeldata.tar.gz | tar zxv -o heasoft-6.36
+# RUN curl -s -L https://heasarc.gsfc.nasa.gov/FTP/software/lheasoft/release/heasoft-6.36src_no_xspec_modeldata.tar.gz | tar -zxv -o heasoft-6.36
 
 # /etc/yum.repos.d/heasoft-6.36/
 # WORKDIR /usr/local/heasoft/heasoft-6.36/BUILD_DIR
@@ -163,10 +161,11 @@ RUN sed -i '89,91d' ${CONDAPFX}/envs/fermi/etc/conda/activate.d/activate_fermito
 RUN  $MAMBA install --name fermi https://anaconda.org/conda-forge/fermipy/1.4.0/download/noarch/fermipy-1.4.0-pyh885dcc9_0.conda 
 # && $MAMBA clean -afy
 
-RUN --mount=type=cache,target=/home/fermi/.cache/pip $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir pyds9 
+RUN --mount=type=cache,target=/home/fermi/.cache/pip $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir pyds9 \
+     git+https://github.com/threeML/astromodels.git \
+     git+https://github.com/threeML/threeML.git 
 # pint-pulsar \
-#     git+https://github.com/threeML/astromodels.git \
-#     git+https://github.com/threeML/threeML.git 
+
 
 # RUN $MAMBA clean -afy
 RUN rm -rf ${CONDAPFX}/pkgs/* &&\
@@ -225,7 +224,7 @@ COPY entrypoint $HOME/entrypoint
 # Keep DS9 this way, trying to merge the RUN(s) doesn't work in Azure.
 # This gives us the LATEST version of the code vs the older conda version :  01/2026 JSA 
 # RUN mkdir $ASTROPFX/bin
-RUN curl --connect-timeout 300 -s -L https://ds9.si.edu/download/source/ds9.8.7b3.tar.gz | tar zxv
+RUN curl --connect-timeout 300 -s -L https://ds9.si.edu/download/source/ds9.8.7b3.tar.gz | tar -zxv
 WORKDIR SAOImageDS9
 RUN unix/configure && make && cp bin/ds9 $ASTROPFX/bin/.
 WORKDIR ../
