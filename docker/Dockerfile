@@ -134,7 +134,6 @@ RUN $MAMBA create --name fermi -c conda-forge  -c fermi --yes \
   "astropy" \
   gammapy \
   pgplot \
-  tempo2 \
   healpy \
   jupyter \
   jupyter_server \
@@ -142,7 +141,10 @@ RUN $MAMBA create --name fermi -c conda-forge  -c fermi --yes \
   "matplotlib" \
   "numpy" \
   "python==3.11.*" \
-  "scipy<1.14" 
+  pytest \
+  conda-forge::nbmake \
+  "scipy" 
+  # "scipy<1.14"
 #  && $MAMBA clean -afy
 
 # Install JoeA's personal arm64 version of pyregion needed only for the bottle. 
@@ -158,12 +160,17 @@ RUN $MAMBA install  --name fermi -c conda-forge  -c fermi --yes \
 RUN sed -i '89,91d' ${CONDAPFX}/envs/fermi/etc/conda/activate.d/activate_fermitools.sh
 
 # Didn't originally install in the fermi env
-RUN  $MAMBA install --name fermi https://anaconda.org/conda-forge/fermipy/1.4.0/download/noarch/fermipy-1.4.0-pyh885dcc9_0.conda 
+
+# RUN pip install git+https://github.com/fermiPy/fermipy.git
+### RUN  $MAMBA install --name fermi https://anaconda.org/conda-forge/fermipy/1.4.0/download/noarch/fermipy-1.4.0-pyh885dcc9_0.conda 
 # && $MAMBA clean -afy
 
-RUN --mount=type=cache,target=/home/fermi/.cache/pip $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir pyds9 \
-     git+https://github.com/threeML/astromodels.git \
-     git+https://github.com/threeML/threeML.git 
+# RUN --mount=type=cache,target=/home/fermi/.cache/pip $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir -c threeml/label/dev threeml &&\
+RUN --mount=type=cache,target=/home/fermi/.cache/pip $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir pyds9 LATSourceModel threeml astromodels \
+git+https://github.com/fermiPy/fermipy.git \
+git+https://github.com/threeML/threeML.git \
+git+https://github.com/threeML/astromodels.git
+#     git+https://github.com/threeML/threeML.git 
 # pint-pulsar \
 
 
@@ -184,12 +191,16 @@ RUN $MAMBA create --name fermigbm -c conda-forge --yes \
     jupyter_server \
     libpng \
     numpy \
-    "scipy==1.14.1" \
+    scipy \
     pandas \
     pip \
     basemap \
-    "python=3.11.*" 
-    # && $MAMBA clean -afy
+    "python=3.11.*" \ 
+    pytest \
+    conda-forge::nbmake \
+    "matplotlib"  # Needed for fermigbm jupyter notebook tests
+#    # && $MAMBA clean -afy
+# "scipy==1.14.1" \
 
 # Hoping to recover space from fermi and fermigdm creations
 # RUN $MAMBA clean -a --yes
@@ -203,15 +214,14 @@ RUN mkdir -p $HOME  &&\
     mkdir $ASTROPFX/bin &&\
     mkdir -p $HOME/.cache/pip
 
-
+# gdt-data init
 # Pull the latest version and make sure NOT to get it from pypi:
 RUN GEOS_DIR=${CONDAPFX}/envs/fermigbm/lib \
     $CONDAPFX/envs/fermigbm/bin/pip3 install --no-cache-dir \
-    astro-gdt-fermi 
-#    --no-binary ":none"  git+https://github.com/USRA-STI/gdt-core.git@main \
-#    --no-binary ":none"  git+https://github.com/USRA-STI/gdt-fermi.git@main \
-#    'scipy>=1.14.0' 
-
+    astro-gdt-fermi \
+    --no-binary ":none"  git+https://github.com/USRA-STI/gdt-core.git@main \
+    --no-binary ":none"  git+https://github.com/USRA-STI/gdt-fermi.git@main 
+    # 'scipy>=1.14.0' 
 
 # Tempo 
 # ENV TEMPO=$ASTROPFX/tempo
@@ -224,9 +234,9 @@ COPY entrypoint $HOME/entrypoint
 # Keep DS9 this way, trying to merge the RUN(s) doesn't work in Azure.
 # This gives us the LATEST version of the code vs the older conda version :  01/2026 JSA 
 # RUN mkdir $ASTROPFX/bin
-RUN curl --connect-timeout 300 -s -L https://ds9.si.edu/download/source/ds9.8.7b3.tar.gz | tar -zxv
-WORKDIR SAOImageDS9
-RUN unix/configure && make && cp bin/ds9 $ASTROPFX/bin/.
+# RUN curl --connect-timeout 300 -s -L https://ds9.si.edu/download/source/ds9.8.7b3.tar.gz | tar -zxv
+# WORKDIR SAOImageDS9
+# RUN unix/configure && make && cp bin/ds9 $ASTROPFX/bin/.
 WORKDIR ../
 
 ##########################################################################
