@@ -24,7 +24,8 @@ cd ScienceTools/
 mkdir -p /home/fermi/FB_TESTING/test_results
 
 # Activate the environment
-# conda activate "$ENV_NAME"
+conda init
+conda activate "$ENV_NAME"
 conda install pmw junit-xml pytest -y
 
 cd /home/fermi/FB_TESTING/test_results/
