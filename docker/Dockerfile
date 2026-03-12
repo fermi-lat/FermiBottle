@@ -228,6 +228,8 @@ RUN GEOS_DIR=${CONDAPFX}/envs/fermigbm/lib \
 # COPY setup_tempo.sh $HOME/setup_tempo.sh
 # RUN sh $HOME/setup_tempo.sh && rm $HOME/setup_tempo.sh
 
+COPY test_fermibottle.sh $HOME/test_fermibottle.sh
+
 RUN sh pwd && ls -l
 COPY entrypoint $HOME/entrypoint
 
@@ -364,6 +366,7 @@ RUN sed -i '135,157d' "/opt/anaconda/envs/fermi/etc/conda/activate.d/activate_fe
 # RUN pwd && ls -l   && \ 
 #    find / -name entrypoint  
 
+COPY --from=builder $HOME/test_fermibottle.sh $HOME/test_fermibottle.sh
 COPY --from=builder $HOME/entrypoint /opt/docker/bin/entrypoint
 RUN ls -l /opt/docker/bin/entrypoint
 ENTRYPOINT ["/opt/docker/bin/entrypoint"]

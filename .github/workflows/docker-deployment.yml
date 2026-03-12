@@ -69,14 +69,18 @@ jobs:
           context: $GITHUB_WORKSPACE/FermiBottle/docker
           platforms: linux/amd64 
           load: true
-          push: true
+          push: false
           tags: ${{ env.TEST_TAG }}
           # file: ./docker/Dockerfile 4,linux/arm64
 
-      - name: Test
+      - name: Run Test script in container
+        # -v mounts the current workspace to /app inside the container
+        # -w sets the working directory inside the container
         run: |
-          docker run ${{ env.TEST_TAG }}
-          # docker run --rm ${{ env.TEST_TAG }}
+          docker run \
+            -w /home/fermi \
+            ${{ env.TEST_TAG }} \
+            sh ./test_fermibottle.sh
 
 #      - name: Build and push
 #        uses: docker/build-push-action@v6
