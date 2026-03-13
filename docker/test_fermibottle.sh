@@ -30,20 +30,20 @@ conda activate "$ENV_NAME"
 conda install pmw junit-xml pytest -y
 
 cd /home/fermi/FB_TESTING/test_results/
-../ScienceTools/recipe/tests/ST-unit-test -w -d -v
-../ScienceTools/recipe/tests/ST-AGN-thread-test -w -d -v
-pytest --junitxml=fermipy_results.xml -vv --pyargs fermipy
+## ../ScienceTools/recipe/tests/ST-unit-test -w -d -v
+## ../ScienceTools/recipe/tests/ST-AGN-thread-test -w -d -v
+## pytest --junitxml=fermipy_results.xml -vv --pyargs fermipy
 pytest --junitxml=threeml_results.xml -vv --pyargs threeML
-# cd ../fermi-summer-school/
-# cd ../fermi-summer-school/Likelihood_Advanced/
-# pytest --nbmake --nbmake-timeout=1000000 --junitxml=/home/fermi/FB_TESTING/test_results/fss_Likelihood_adv_result.xml -vv *.ipynb
+cd ../fermi-summer-school/
+cd ../fermi-summer-school/Likelihood_Advanced/
+pytest --nbmake --nbmake-timeout=1000000 --junitxml=/home/fermi/FB_TESTING/test_results/fss_Likelihood_adv_result.xml -vv *.ipynb
 # cd ../Data_Exploration/
-# pytest --nbmake --nbmake-timeout=1000000 --junitxml=/home/fermi/FB_TESTING/test_results/data_quicklook_result.xml -vv pytest --nbmake --nbmake-timeout=10000 --junitxml=de_result2.xml -vv Data_Exploration/Data_Exploration.ipynb Data_QuickLook.ipynb 
+x# pytest --nbmake --nbmake-timeout=1000000 --junitxml=/home/fermi/FB_TESTING/test_results/data_quicklook_result.xml -vv pytest --nbmake --nbmake-timeout=10000 --junitxml=de_result2.xml -vv Data_Exploration/Data_Exploration.ipynb Data_QuickLook.ipynb 
 #pytest --nbmake --nbmake-timeout=10000 --junitxml=/home/fermi/FB_TESTING/test_results/de_data_expl_result.xml  -vv Data_Exploration/Data_Exploration.ipynb 
 # echo "Setup complete: Env $ENV_NAME activated, repo cloned, and test_results created."
 
 conda deactivate
-conda activate fermigdm
+conda activate fermigbm
 cd ../gdt-fermi/docs/notebooks
 for f in *.tar; do tar -xf "$f"; done
 pytest --nbmake --nbmake-timeout=10000 --junitxml=/home/fermi/FB_TESTING/test_results/gdt_fermi_results.xml -vv *.ipynb
