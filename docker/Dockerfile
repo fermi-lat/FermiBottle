@@ -143,7 +143,9 @@ RUN $MAMBA create --name fermi -c conda-forge  -c fermi --yes \
   "python==3.11.*" \
   pytest \
   conda-forge::nbmake \
-  "scipy" 
+  "scipy" \
+  pmw \
+  junit-xml 
   # "scipy<1.14"
 #  && $MAMBA clean -afy
 
@@ -186,6 +188,7 @@ RUN $MAMBA create --name fermigbm -c conda-forge --yes \
     basemap-data-hires \
     cfitsio \
     geos \
+    gdt-devel \ 
     healpy \
     jupyter \
     jupyter_server \
