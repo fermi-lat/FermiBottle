@@ -55,7 +55,7 @@ export TEMPO2=${TEMPO2}
 export PATH=${PATH}:\$PATH
 
 # Source the tools!
-. \$HEADAS/headas-init.sh
+# . \$HEADAS/headas-init.sh
 
 " >> $HOME/.bash_profile
 fi
@@ -67,6 +67,7 @@ if [ ! .bashrc -nt /.fermibottle ]; then
 alias notebook='jupyter notebook --ip 00.00.00.00 --no-browser'
 #alias gbm-demos='jupyter notebook --ip 00.00.00.00 --no-browser /home/fermi/.gbm_data_tools/1.1.1/tutorials'
 alias ll='ls -la'
+alias vi='vim'
 alias gdt-notebook='jupyter notebook --ip 00.00.00.00 --no-browser /shared/gdt_demo'
 " >> $HOME/.bashrc
 fi
@@ -75,7 +76,7 @@ fi
 /opt/anaconda/bin/conda init --all -q > /dev/null 2>&1
 # /opt/anaconda/bin/conda activate fermi
 # . /opt/anaconda/bin/activate base
-. $HEADAS/headas-init.sh
+# . $HEADAS/headas-init.sh
 chown -R fermi:fermi $HOME/pfiles
 chown -R fermi:fermi $HOME
 

@@ -131,19 +131,19 @@ RUN $CONDABIN install --channel conda-forge --yes "mamba>=0.23" su-exec "setupto
 
 # Build the fermi env
 RUN $MAMBA create --name fermi -c conda-forge  -c fermi --yes \
-  "astropy" \
+  astropy \
   gammapy \
   pgplot \
   healpy \
   jupyter \
   jupyter_server \
   libpng \
-  "matplotlib" \
-  "numpy" \
+  matplotlib \
+  numpy \
   "python==3.11.*" \
   pytest \
   conda-forge::nbmake \
-  "scipy" \
+  scipy \
   pmw \
   junit-xml 
   # "scipy<1.14"
@@ -168,7 +168,7 @@ RUN sed -i '89,91d' ${CONDAPFX}/envs/fermi/etc/conda/activate.d/activate_fermito
 # && $MAMBA clean -afy
 
 # RUN --mount=type=cache,target=/home/fermi/.cache/pip $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir -c threeml/label/dev threeml &&\
-RUN --mount=type=cache,target=/home/fermi/.cache/pip $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir pyds9 LATSourceModel threeml astromodels \
+RUN --mount=type=cache,target=/home/fermi/.cache/pip $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir pyds9 LATSourceModel threeml astromodels astropy-iers-data \
 git+https://github.com/fermiPy/fermipy.git \
 git+https://github.com/threeML/threeML.git \
 git+https://github.com/threeML/astromodels.git
