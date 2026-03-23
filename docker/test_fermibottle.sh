@@ -26,17 +26,17 @@ mkdir -p /home/fermi/FB_TESTING/test_results
 # Activate the environment
 # Initialize conda for this shell session
 eval "$(conda shell.bash hook)"
-conda activate "$ENV_NAME"
+# conda activate "$ENV_NAME"
 # conda install pmw junit-xml pytest -y
 
 cd /home/fermi/FB_TESTING/test_results/
-## ../ScienceTools/recipe/tests/ST-unit-test -w -d -v
-## ../ScienceTools/recipe/tests/ST-AGN-thread-test -w -d -v
-## pytest --junitxml=fermipy_results.xml -vv --pyargs fermipy
-## pytest --junitxml=threeml_results.xml -vv --pyargs threeML
-pytest --junitxml=threeml_results.xml -vv --pyargs astromodels
-cd ../fermi-summer-school/
-pytest --nbmake --nbmake-timeout=1000000 --junitxml=/home/fermi/FB_TESTING/test_results/fss_Likelihood_adv_result.xml -vv Likelihood_Advanced/*.ipynb
+../ScienceTools/recipe/tests/ST-unit-test -w -d -v
+../ScienceTools/recipe/tests/ST-AGN-thread-test -w -d -v
+pytest --junitxml=fermipy_results.xml -vv --pyargs fermipy
+pytest --junitxml=threeml_results.xml -vv --pyargs threeML
+# pytest --junitxml=threeml_results.xml -vv --pyargs astromodels
+### cd ../fermi-summer-school/
+### pytest --nbmake --nbmake-timeout=1000000 --junitxml=/home/fermi/FB_TESTING/test_results/fss_Likelihood_adv_result.xml -vv Likelihood_Advanced/*.ipynb
 # cd ../Data_Exploration/
 # pytest --nbmake --nbmake-timeout=1000000 --junitxml=/home/fermi/FB_TESTING/test_results/data_quicklook_result.xml -vv 
 # pytest --nbmake --nbmake-timeout=10000 --junitxml=de_result2.xml -vv Data_Exploration/Data_Exploration.ipynb Data_QuickLook.ipynb 
@@ -48,7 +48,7 @@ pytest --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_res
 pytest --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_results/blh1_result.xml -vv 1.BinnedLikelihood/*.ipynb
 pytest --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_results/lap7_result.xml -vv 7.LATAperturePhotometry/*.ipynb
 
-conda deactivate
+## conda deactivate
 conda activate fermigbm
 cd /home/fermi/gdt-fermi/docs/notebooks
 for f in *.tar; do tar -xf "$f"; done

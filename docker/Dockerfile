@@ -188,7 +188,7 @@ RUN $MAMBA create --name fermigbm -c conda-forge --yes \
     basemap-data-hires \
     cfitsio \
     geos \
-    gdt-devel \ 
+    libgdal-devel \ 
     healpy \
     jupyter \
     jupyter_server \
