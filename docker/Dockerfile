@@ -188,7 +188,6 @@ RUN $MAMBA create --name fermigbm -c conda-forge --yes \
     basemap-data-hires \
     cfitsio \
     geos \
-    libgdal-devel \ 
     healpy \
     jupyter \
     jupyter_server \
@@ -217,7 +216,7 @@ RUN mkdir -p $HOME  &&\
     mkdir $ASTROPFX/bin &&\
     mkdir -p $HOME/.cache/pip
 
-# gdt-data init
+gdt-data init
 # Pull the latest version and make sure NOT to get it from pypi:
 RUN GEOS_DIR=${CONDAPFX}/envs/fermigbm/lib \
     $CONDAPFX/envs/fermigbm/bin/pip3 install --no-cache-dir \
