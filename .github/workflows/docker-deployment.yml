@@ -24,7 +24,7 @@ jobs:
   docker:
     strategy:
       matrix:
-        os: [ubuntu-24.04, ubuntu-24.04-arm]
+        os: [ubuntu-24.04-arm]
     # ubuntu-24.04-arm, ubuntu-24.04
     runs-on: ${{ matrix.os }}   
     steps:
@@ -67,11 +67,11 @@ jobs:
         uses: docker/build-push-action@v7
         with:
           context: $GITHUB_WORKSPACE/FermiBottle/docker
-          platforms: linux/amd64 , linux/arm64 
+          platforms: linux/arm64 
           load: true
           push: true
           tags: ${{ env.TEST_TAG }}
-          # file: ./docker/Dockerfile 4,linux/arm64
+          # file: ./docker/Dockerfile 4,linux/arm64, linux/amd64
 
       - name: Run Test script in container
         # -v mounts the current workspace to /app inside the container
