@@ -17,14 +17,14 @@ on:
         default: 'warning'
 
 env:
-  TEST_TAG: fssc/fermibottle_lite:2026.03.11
+  TEST_TAG: fssc/fermibottle_lite:2026.03.24
   LATEST_TAG: fermi-lat/fermibottle2026:latest
 
 jobs:
   docker:
     strategy:
       matrix:
-        os: [ubuntu-24.04]
+        os: [ubuntu-24.04, ubuntu-24.04-arm]
     # ubuntu-24.04-arm, ubuntu-24.04
     runs-on: ${{ matrix.os }}   
     steps:
@@ -67,9 +67,9 @@ jobs:
         uses: docker/build-push-action@v7
         with:
           context: $GITHUB_WORKSPACE/FermiBottle/docker
-          platforms: linux/amd64 
+          platforms: linux/amd64 , linux/arm64 
           load: true
-          push: false
+          push: true
           tags: ${{ env.TEST_TAG }}
           # file: ./docker/Dockerfile 4,linux/arm64
 
