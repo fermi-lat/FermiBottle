@@ -130,15 +130,17 @@ RUN $CONDABIN config --set remote_connect_timeout_secs 500 &&\
 RUN $CONDABIN install --channel conda-forge --yes "mamba>=0.23" su-exec "setuptools" tini
 
 # Build the fermi env
+# "gammapy==2.0.1" \
+# "matplotlib==3.10.*" \
 RUN $MAMBA create --name fermi -c conda-forge  -c fermi --yes \
   astropy \
-  "gammapy==2.0.1" \
+  gammapy \
   pgplot \
   healpy \
   jupyter \
   jupyter_server \
   libpng \
-  "matplotlib==3.10.*" \
+  matplotlib \
   numpy \
   "python==3.11.*" \
   pytest \
