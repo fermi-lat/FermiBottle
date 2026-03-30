@@ -132,19 +132,20 @@ RUN $CONDABIN install --channel conda-forge --yes "mamba>=0.23" su-exec "setupto
 # Build the fermi env
 RUN $MAMBA create --name fermi -c conda-forge  -c fermi --yes \
   astropy \
-  gammapy \
+  "gammapy==2.0.1" \
   pgplot \
   healpy \
   jupyter \
   jupyter_server \
   libpng \
-  matplotlib \
+  "matplotlib==3.10.*" \
   numpy \
   "python==3.11.*" \
   pytest \
   conda-forge::nbmake \
   scipy \
   pmw \
+  seaborn \
   junit-xml 
   # "scipy<1.14"
 #  && $MAMBA clean -afy

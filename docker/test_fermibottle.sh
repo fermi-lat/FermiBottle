@@ -37,9 +37,8 @@ pytest --junitxml=threeml_results.xml -vv --pyargs threeML
 # pytest --junitxml=threeml_results.xml -vv --pyargs astromodels
 ### cd ../fermi-summer-school/
 ### pytest --nbmake --nbmake-timeout=1000000 --junitxml=/home/fermi/FB_TESTING/test_results/fss_Likelihood_adv_result.xml -vv Likelihood_Advanced/*.ipynb
-# cd ../Data_Exploration/
-# pytest --nbmake --nbmake-timeout=1000000 --junitxml=/home/fermi/FB_TESTING/test_results/data_quicklook_result.xml -vv 
-# pytest --nbmake --nbmake-timeout=10000 --junitxml=de_result2.xml -vv Data_Exploration/Data_Exploration.ipynb Data_QuickLook.ipynb 
+cd /home/fermi/FB_TESTING/fermi-summer-school/
+pytest --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_results/data_quicklook_result.xml -vv Data_Exploration/*.ipynb
 ## pytest --nbmake --nbmake-timeout=10000 --junitxml=/home/fermi/FB_TESTING/test_results/de_data_expl_result.xml  -vv Data_Exploration/Data_Exploration.ipynb 
 # echo "Setup complete: Env $ENV_NAME activated, repo cloned, and test_results created."
 
@@ -47,12 +46,12 @@ pytest --junitxml=threeml_results.xml -vv --pyargs threeML
 # pytest --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_results/de_data_expl_result.xml  -vv Data_Exploration/Data_Exploration.ipynb
 
 
-# cd /home/fermi/FB_TESTING/AnalysisThreads/SourceAnalysis
+cd /home/fermi/FB_TESTING/AnalysisThreads/SourceAnalysis
 # Currently failing
-# pytest --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_results/esa6_result.xml -vv 6.ExtendedSourceAnalysis/*.ipynb
-# pytest --nbmake --nbmake-timeout=10000 --junitxml=/home/fermi/FB_TESTING/test_results/ulh2_result.xml -vv 2.UnbinnedLikelihood/*.ipynb
-# pytest --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_results/pul5_result.xml -vv 5.PythonUpperLimits/*.ipynb
-# pytest --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_results/pg8_results.xml -vv  8.PulsarGating/*.ipynb
+pytest --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_results/esa6_result.xml -vv 6.ExtendedSourceAnalysis/*.ipynb
+pytest --nbmake --nbmake-timeout=10000 --junitxml=/home/fermi/FB_TESTING/test_results/ulh2_result.xml -vv 2.UnbinnedLikelihood/*.ipynb
+pytest --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_results/pul5_result.xml -vv 5.PythonUpperLimits/*.ipynb
+pytest --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_results/pg8_results.xml -vv  8.PulsarGating/*.ipynb
 
 # Should work, running in cicd
 # pytest --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_results/blh1_result.xml -vv 1.BinnedLikelihood/*.ipynb
