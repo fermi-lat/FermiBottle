@@ -54,15 +54,15 @@ pytest --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_res
 pytest --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_results/pg8_results.xml -vv  8.PulsarGating/*.ipynb
 
 # Should work, running in cicd
-# pytest --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_results/blh1_result.xml -vv 1.BinnedLikelihood/*.ipynb
-# pytest --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_results/plh3_result.xml -vv 3.PythonLikelihood/*.ipynb
-# pytest --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_results/splh4_result.xml -vv 4.SummedPythonLikelihood/*.ipynb
-# pytest --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_results/lap7_result.xml -vv 7.LATAperturePhotometry/*.ipynb
-# pytest --nbmake --nbmake-timeout=5000 --junitxml=/home/fermi/FB_TESTING/test_results/ed10_result.xml -vv 10.EnergyDispersion/*.ipynb
+pytest --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_results/blh1_result.xml -vv 1.BinnedLikelihood/*.ipynb
+pytest --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_results/plh3_result.xml -vv 3.PythonLikelihood/*.ipynb
+pytest --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_results/splh4_result.xml -vv 4.SummedPythonLikelihood/*.ipynb
+pytest --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_results/lap7_result.xml -vv 7.LATAperturePhotometry/*.ipynb
+pytest --nbmake --nbmake-timeout=5000 --junitxml=/home/fermi/FB_TESTING/test_results/ed10_result.xml -vv 10.EnergyDispersion/*.ipynb
 
-# conda deactivate
-# conda activate fermigbm
-# cd /home/fermi/FB_TESTING/gdt-fermi/docs/notebooks
-# for f in *.tar; do tar -xf "$f"; done
-# pytest --nbmake --nbmake-timeout=10000 --junitxml=/home/fermi/FB_TESTING/test_results/gdt_fermi_results.xml -vv *.ipynb
-# echo "Setup complete: Env fermigbm"
+conda deactivate
+conda activate fermigbm
+cd /home/fermi/FB_TESTING/gdt-fermi/docs/notebooks
+for f in *.tar; do tar -xf "$f"; done
+pytest --nbmake --nbmake-timeout=10000 --junitxml=/home/fermi/FB_TESTING/test_results/gdt_fermi_results.xml -vv *.ipynb
+echo "Setup complete: Env fermigbm"
