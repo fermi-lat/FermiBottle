@@ -80,11 +80,11 @@ jobs:
         run: |
           echo "Run fermi env tests on branch ${{ github.ref_name }}"
 
-          ScienceTools/recipe/tests/ST-unit-test -w -d -v
-          ScienceTools/recipe/tests/ST-AGN-thread-test -w -d -v
-          # Run Fermipy's tests and save them so they can be reported on the dashboard.
           pytest --junitxml=fermipy_results.xml -vv --pyargs fermipy
           pytest --junitxml=threeml_results.xml -vv --pyargs threeML
+          ${{ github.workspace }}/FB_TESTING/ScienceTools/recipe/tests/ST-unit-test -w -d -v
+          ${{ github.workspace }}/FB_TESTING/ScienceTools/recipe/tests/ST-AGN-thread-test -w -d -v
+          # Run Fermipy's tests and save them so they can be reported on the dashboard.
 
       # The layout for this reporting action works. Not sure if there is something better, but it does a good job for us.
       - name: Publish Test Results Linux
