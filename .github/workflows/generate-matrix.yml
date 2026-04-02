@@ -6,7 +6,7 @@ on:
         description: "JSON array of matrix values"
         value: ${{ jobs.generate-matrix.outputs.matrix }}
       baseline_label:
-        description: "Build label used for conda package: dev/rc/main"
+        description: "Build label used for conda package: dev/rc/master"
         value: ${{ jobs.generate-matrix.outputs.build_label }}
 
 env:

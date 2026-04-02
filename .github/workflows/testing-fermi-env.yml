@@ -7,10 +7,6 @@ on:
         required: true
         type: string
         description: "matrix.os to be ran"
-      fermitools_pkg_ver:
-        required: true
-        type: string
-        description: "Fermitools package version"
       build_label:
         required: true
         type: string

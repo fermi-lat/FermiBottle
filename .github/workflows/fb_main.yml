@@ -1,0 +1,30 @@
+name: Master CI/CD workflow for FermiBottle independent testing
+on:
+  push:
+    branches: master # ${{github.ref_name}} not allowed here.
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'
+        required: true
+        default: 'warning'
+  schedule:
+    # Run only Sunday morning starting at 12am EST
+    - cron: '0 0 * * 0'
+
+jobs:
+  # This workflow returns a JSON matrix that covers the 2 OSes (macos,linux) and 2 architectures (x86,arm64) we currently support. Plus additional variables needed by the other workflows.
+  generate-matrix-tuple:
+    uses: ./.github/workflows/generate-matrix.yml # Call the matrix-generating workflow
+
+  test-fermi-env:
+    strategy:
+      matrix: ${{ fromJson(needs.generate-matrix-tuple.outputs.matrix) }}
+    # if: ${{ contains(needs.generate-matrix-tuple.outputs.baseline_label,'rc') }}
+    if: ${{ contains( fromJSON('["rc", "master"]'), needs.generate-matrix-tuple.outputs.baseline_label) }}
+    needs: [generate-matrix-tuple] # Ensure matrix generation completes first
+    uses: ./.github/workflows/testing-fermi-env.yml # Call the matrix-generating workflow
+    secrets: inherit
+    with:
+      matrix_os: ${{ matrix.os }}
+      build_label: ${{needs.generate-matrix-tuple.outputs.baseline_label }}
