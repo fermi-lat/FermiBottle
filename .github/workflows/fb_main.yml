@@ -20,9 +20,7 @@ jobs:
   test-fermi-env:
     strategy:
       matrix: ${{ fromJson(needs.generate-matrix-tuple.outputs.matrix) }}
-    # if: ${{ contains(needs.generate-matrix-tuple.outputs.baseline_label,'rc') }}
-    if: ${{ contains( fromJSON('["rc", "master"]'), needs.generate-matrix-tuple.outputs.baseline_label) }}
-    needs: [generate-matrix-tuple] # Ensure matrix generation completes first
+    needs: generate-matrix-tuple # Ensure matrix generation completes first
     uses: ./.github/workflows/testing-fermi-env.yml # Call the matrix-generating workflow
     secrets: inherit
     with:
