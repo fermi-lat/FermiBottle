@@ -26,3 +26,4 @@ jobs:
     with:
       matrix_os: ${{ matrix.os }}
       build_label: ${{needs.generate-matrix-tuple.outputs.baseline_label }}
+      env_file: ${{ matrix.env_target_file}}

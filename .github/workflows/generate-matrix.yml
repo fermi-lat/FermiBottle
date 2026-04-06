@@ -24,7 +24,7 @@ jobs:
       - id: set_matrix
         run: |
           # {"os": "macos-13", "arch": "x86_64", "env_target_file": "fermitools-fermi-env.yml", "packages": "llvm cfitsio swig"},
-          MATRIX_VALUES='{"os": "macos-15-intel", "arch": "x86_64", "env_target_file": "fermitools-fermi-env.yml", "packages": "llvm cfitsio swig"}, {"os": "ubuntu-24.04-arm", "arch": "arm64", "env_target_file": "fermitools-fermi-env.yml"},{"os": "ubuntu-24.04", "arch": "x86", "container": "redhat/ubi8:latest", "env_target_file": "fermitools-fermi-env.yml"}, {"os": "macos-15", "arch": "arm64", "env_target_file": "fermitools-fermi-env.yml", "packages": "llvm cfitsio swig"}' 
+          MATRIX_VALUES='{"os": "macos-15-intel", "arch": "x86_64", "env_target_file": "fermitools-fermi-env-osx.yml", "packages": "llvm cfitsio swig"}, {"os": "ubuntu-24.04-arm", "arch": "arm64", "env_target_file": "fermitools-fermi-env-linux.yml"},{"os": "ubuntu-24.04", "arch": "x86", "container": "redhat/ubi8:latest", "env_target_file": "fermitools-fermi-env-linux.yml"}, {"os": "macos-15", "arch": "arm64", "env_target_file": "fermitools-fermi-env-osx.yml", "packages": "llvm cfitsio swig"}' 
           echo "matrix={\"include\":[$MATRIX_VALUES]}" >> "$GITHUB_OUTPUT"
 
     outputs:
