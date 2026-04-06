@@ -48,25 +48,25 @@ jobs:
         uses: actions/checkout@v6
         with:
           repository: USRA-STI/gdt-fermi
-          path: ${{ github.workspace }}/FB_TESTING/gdt-fermi
+          path: FB_TESTING/gdt-fermi
 
       - name: Checkout Summer School Repo
         uses: actions/checkout@v6
         with:
           repository: FermiSummerSchool/fermi-summer-school
-          path: ${{ github.workspace }}/FB_TESTING/fermi-summer-school
+          path: FB_TESTING/fermi-summer-school
 
       - name: Checkout Analysis Repo
         uses: actions/checkout@v6
         with:
           repository: fermi-lat/AnalysisThreads
-          path: ${{ github.workspace }}/FB_TESTING/AnalysisThreads
+          path: FB_TESTING/AnalysisThreads
 
       - name: Checkout Science Tools
         uses: actions/checkout@v6
         with:
           repository: fermi-lat/ScienceTools
-          path: ${{ github.workspace }}/FB_TESTING/ScienceTools
+          path: FB_TESTING/ScienceTools
 
       - name: Checkout FB_TESTING
         id: checkout_fb_testing
