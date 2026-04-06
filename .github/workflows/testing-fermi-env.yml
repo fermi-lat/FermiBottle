@@ -97,18 +97,53 @@ jobs:
       #    path: downloaded-package # Directory where the artifact will be downloaded
 
   # BUG: This doesn't handle Tags RC and MAIN, it will only pull from tag dev. 
+      - name: Test GBM Notebooks pkg.
+        id: test_gbm_nb_fermi
+        # continue-on-error: ${{ fromJSON(vars.CONTINUE_ON_ERROR || 'false') }}  # Default is to fail at first error
+        run: |
+          conda deactivate
+          conda activate fermigbm
+          cd ${{ github.workspace }}/gdt-fermi/docs/notebooks
+          for f in *.tar; do tar -xf "$f"; done
+          pytest --nbmake --nbmake-timeout=10000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/gdt_fermi_results.xml -vv ./*.ipynb
+          echo "Setup complete: Env fermigbm"
+          conda deactivate
+
+      - name: Test SourceAnalysis  Notebooks pkg.
+        id: test_source_analysis_nb_fermi
+        # continue-on-error: ${{ fromJSON(vars.CONTINUE_ON_ERROR || 'false') }}  # Default is to fail at first error
+        run: |
+          conda activate fermi
+          conda list
+          echo "Run fermi env source_analysis_nb tests on branch ${{ github.ref_name }}"
+          cd ${{ github.workspace }}/FB_TESTING/AnalysisThreads/SourceAnalysis
+          pytest --nbmake --nbmake-timeout=3000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/esa6_result.xml -vv 6.ExtendedSourceAnalysis/*.ipynb
+          pytest --nbmake --nbmake-timeout=10000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/ulh2_result.xml -vv 2.UnbinnedLikelihood/*.ipynb
+          pytest --nbmake --nbmake-timeout=3000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/pul5_result.xml -vv 5.PythonUpperLimits/*.ipynb
+          pytest --nbmake --nbmake-timeout=3000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/pg8_results.xml -vv  8.PulsarGating/*.ipynb
+          pytest --nbmake --nbmake-timeout=3000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/blh1_result.xml -vv 1.BinnedLikelihood/*.ipynb
+          pytest --nbmake --nbmake-timeout=3000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/plh3_result.xml -vv 3.PythonLikelihood/*.ipynb
+          pytest --nbmake --nbmake-timeout=3000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/splh4_result.xml -vv 4.SummedPythonLikelihood/*.ipynb
+          pytest --nbmake --nbmake-timeout=3000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/lap7_result.xml -vv 7.LATAperturePhotometry/*.ipynb
+          pytest --nbmake --nbmake-timeout=5000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/ed10_result.xml -vv 10.EnergyDispersion/*.ipynb
+          conda deactivate
 
       - name: Test fermipy with latest Fermitools conda pkg.
         id: test_fermi
         # continue-on-error: ${{ fromJSON(vars.CONTINUE_ON_ERROR || 'false') }}  # Default is to fail at first error
         run: |
+          conda activate fermi
           echo "Run fermi env tests on branch ${{ github.ref_name }}"
-          ls -l ${{ github.workspace }}/FB_TESTING/ScienceTools/
+          ls -l ${{ github.workspace }}/FB_TESTING/
+          cd ${{ github.workspace }}/FB_TESTING/
           ${{ github.workspace }}/FB_TESTING/ScienceTools/recipe/tests/ST-unit-test -w -d -v
           ${{ github.workspace }}/FB_TESTING/ScienceTools/recipe/tests/ST-AGN-thread-test -w -d -v
           # Run Fermipy's tests and save them so they can be reported on the dashboard.
           pytest --junitxml=fermipy_results.xml -vv --pyargs fermipy
           pytest --junitxml=threeml_results.xml -vv --pyargs threeML
+          conda deactivate
+
+
 
       # The layout for this reporting action works. Not sure if there is something better, but it does a good job for us.
       - name: Publish Test Results Linux
