@@ -96,7 +96,22 @@ jobs:
       #    name: "${{ matrix.os }}-fermitools-package"
       #    path: downloaded-package # Directory where the artifact will be downloaded
 
-  # BUG: This doesn't handle Tags RC and MAIN, it will only pull from tag dev. 
+      # BUG: This doesn't handle Tags RC and MAIN, it will only pull from tag dev. 
+      - name: Test Subset fermi-summer-school  Notebooks pkg.
+        id: test_summer_school_nb_fermi
+        run: |
+          # conda list
+          echo "Run fermi env fermi-summer-school tests on branch ${{ github.ref_name }}"
+          cd ${{ github.workspace }}/FB_TESTING/fermi-summer-school/
+          # 2 nbs  
+          pytest --nbmake --nbmake-timeout=3000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/fss_data_exploration_result.xml -vv Data_Exploration/*.ipynb 
+          # 4 NBs
+          pytest --nbmake --nbmake-timeout=3000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/fss_likelihood_adv_result.xml -vv Likelihood_Advanced/*.ipynb  
+          pytest --nbmake --nbmake-timeout=3000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/fss_find_source_result.xml -vv  Advanced_Topics/FindSource/*.ipynb 
+          # Need these too:
+          # https://fermi.gsfc.nasa.gov/ssc/dev/tutorials/Likelihood_rcw103.tgz
+          # https://fermi.gsfc.nasa.gov/ssc/dev/tutorials/Likelihood_rxj1713.tgz
+
       - name: Test SourceAnalysis  Notebooks pkg.
         id: test_source_analysis_nb_fermi
         # continue-on-error: ${{ fromJSON(vars.CONTINUE_ON_ERROR || 'false') }}  # Default is to fail at first error
