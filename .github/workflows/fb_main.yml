@@ -19,6 +19,7 @@ jobs:
 
   test-fermi-env:
     strategy:
+      fail-fast: false  # Runs all matrix combinations even if some fail
       matrix: ${{ fromJson(needs.generate-matrix-tuple.outputs.matrix) }}
     needs: generate-matrix-tuple # Ensure matrix generation completes first
     uses: ./.github/workflows/testing-fermi-env.yml # Call the matrix-generating workflow

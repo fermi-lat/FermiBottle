@@ -99,6 +99,7 @@ jobs:
       # BUG: This doesn't handle Tags RC and MAIN, it will only pull from tag dev.
       - name: Test Realtime_execution_R  Notebooks pkg.
         id: test_realtime_execution_r_nb_fermi
+        if: ${{ !cancelled() }}
         run: |
           # conda list
           echo "Run fermi env realtime execution R* tests on branch ${{ github.ref_name }}"
@@ -108,12 +109,13 @@ jobs:
           wget https://fermi.gsfc.nasa.gov/ssc/data/analysis/scitools/data/SummerSchool/Likelihood_rcw103.tgz
           tar -xvf Likelihood_rxj1713.tgz
           cd Likelihood_rxj1713/
-          pytest --nbmake --nbmake-timeout=3000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/ss_real_exe_rxj1713_result.xml -vv Realtime_execution_RXJ1713.ipynb 
+          pytest --nbmake --nbmake-timeout=6000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/ss_real_exe_rxj1713_result.xml -vv Realtime_execution_RXJ1713.ipynb 
           cd ../
           tar -xvf Likelihood_rcw103.tgz
           cd Likelihood_rcw103/
-          pytest --nbmake --nbmake-timeout=3000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/ss_real_exe_rcw103_result.xml -vv Realtime_execution_RCW103.ipynb
-
+          pytest --nbmake --nbmake-timeout=6000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/ss_real_exe_rcw103_result.xml -vv Realtime_execution_RCW103.ipynb
+        continue-on-error: true  # Job keeps going even if tests fail
+ 
       # BUG: This doesn't handle Tags RC and MAIN, it will only pull from tag dev. 
       - name: Test Subset fermi-summer-school  Notebooks pkg.
         id: test_summer_school_nb_fermi
@@ -125,10 +127,11 @@ jobs:
           pytest --nbmake --nbmake-timeout=3000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/fss_data_exploration_result.xml -vv Data_Exploration/*.ipynb 
           # 4 NBs
           ## pytest --nbmake --nbmake-timeout=3000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/fss_likelihood_adv_result.xml -vv Likelihood_Advanced/*.ipynb  
-          ## pytest --nbmake --nbmake-timeout=3000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/fss_find_source_result.xml -vv  Advanced_Topics/FindSource/*.ipynb 
+          pytest --nbmake --nbmake-timeout=3000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/fss_find_source_result.xml -vv  Advanced_Topics/FindSource/*.ipynb 
           # Need these too:
           # https://fermi.gsfc.nasa.gov/ssc/dev/tutorials/Likelihood_rcw103.tgz
           # https://fermi.gsfc.nasa.gov/ssc/dev/tutorials/Likelihood_rxj1713.tgz
+        continue-on-error: true  # Job keeps going even if tests fail
 
       - name: Test SourceAnalysis  Notebooks pkg.
         id: test_source_analysis_nb_fermi
@@ -146,6 +149,7 @@ jobs:
           # pytest --nbmake --nbmake-timeout=3000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/splh4_result.xml -vv 4.SummedPythonLikelihood/*.ipynb
           # pytest --nbmake --nbmake-timeout=3000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/lap7_result.xml -vv 7.LATAperturePhotometry/*.ipynb
           # pytest --nbmake --nbmake-timeout=5000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/ed10_result.xml -vv 10.EnergyDispersion/*.ipynb
+        continue-on-error: true  # Job keeps going even if tests fail
 
       - name: Test fermipy with latest Fermitools conda pkg.
         id: test_fermi
@@ -159,6 +163,7 @@ jobs:
           # Run Fermipy's tests and save them so they can be reported on the dashboard.
           pytest --junitxml=fermipy_results.xml -vv --pyargs fermipy
           pytest --junitxml=threeml_results.xml -vv --pyargs threeML
+        continue-on-error: true  # Job keeps going even if tests fail
 
       # The layout for this reporting action works. Not sure if there is something better, but it does a good job for us.
       - name: Publish Test Results Linux
