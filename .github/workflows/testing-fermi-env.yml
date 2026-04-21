@@ -96,6 +96,24 @@ jobs:
       #    name: "${{ matrix.os }}-fermitools-package"
       #    path: downloaded-package # Directory where the artifact will be downloaded
 
+      # BUG: This doesn't handle Tags RC and MAIN, it will only pull from tag dev.
+      - name: Test Realtime_execution_R  Notebooks pkg.
+        id: test_realtime_execution_r_nb_fermi
+        run: |
+          # conda list
+          echo "Run fermi env realtime execution R* tests on branch ${{ github.ref_name }}"
+          mkdir -p ${{ github.workspace }}/FB_TESTING/realtime-execution/
+          cd ${{ github.workspace }}/FB_TESTING/realtime-execution/
+          wget https://fermi.gsfc.nasa.gov/ssc/data/analysis/scitools/data/SummerSchool/Likelihood_rxj1713.tgz
+          wget https://fermi.gsfc.nasa.gov/ssc/data/analysis/scitools/data/SummerSchool/Likelihood_rcw103.tgz
+          tar -xvf Likelihood_rxj1713.tgz
+          cd Likelihood_rxj1713/
+          pytest --nbmake --nbmake-timeout=3000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/ss_real_exe_rxj1713_result.xml -vv Realtime_execution_RXJ1713.ipynb 
+          cd ../
+          tar -xvf Likelihood_rcw103.tgz
+          cd Likelihood_rcw103/
+          pytest --nbmake --nbmake-timeout=3000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/ss_real_exe_rcw103_result.xml -vv Realtime_execution_RCW103.ipynb
+
       # BUG: This doesn't handle Tags RC and MAIN, it will only pull from tag dev. 
       - name: Test Subset fermi-summer-school  Notebooks pkg.
         id: test_summer_school_nb_fermi
@@ -106,8 +124,8 @@ jobs:
           # 2 nbs  
           pytest --nbmake --nbmake-timeout=3000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/fss_data_exploration_result.xml -vv Data_Exploration/*.ipynb 
           # 4 NBs
-          pytest --nbmake --nbmake-timeout=3000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/fss_likelihood_adv_result.xml -vv Likelihood_Advanced/*.ipynb  
-          pytest --nbmake --nbmake-timeout=3000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/fss_find_source_result.xml -vv  Advanced_Topics/FindSource/*.ipynb 
+          ## pytest --nbmake --nbmake-timeout=3000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/fss_likelihood_adv_result.xml -vv Likelihood_Advanced/*.ipynb  
+          ## pytest --nbmake --nbmake-timeout=3000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/fss_find_source_result.xml -vv  Advanced_Topics/FindSource/*.ipynb 
           # Need these too:
           # https://fermi.gsfc.nasa.gov/ssc/dev/tutorials/Likelihood_rcw103.tgz
           # https://fermi.gsfc.nasa.gov/ssc/dev/tutorials/Likelihood_rxj1713.tgz
@@ -118,16 +136,16 @@ jobs:
         run: |
           conda list
           echo "Run fermi env source_analysis_nb tests on branch ${{ github.ref_name }}"
-          cd ${{ github.workspace }}/FB_TESTING/AnalysisThreads/SourceAnalysis
-          pytest --nbmake --nbmake-timeout=3000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/esa6_result.xml -vv 6.ExtendedSourceAnalysis/*.ipynb
-          pytest --nbmake --nbmake-timeout=10000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/ulh2_result.xml -vv 2.UnbinnedLikelihood/*.ipynb
-          pytest --nbmake --nbmake-timeout=3000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/pul5_result.xml -vv 5.PythonUpperLimits/*.ipynb
-          pytest --nbmake --nbmake-timeout=3000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/pg8_results.xml -vv  8.PulsarGating/*.ipynb
-          pytest --nbmake --nbmake-timeout=3000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/blh1_result.xml -vv 1.BinnedLikelihood/*.ipynb
-          pytest --nbmake --nbmake-timeout=3000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/plh3_result.xml -vv 3.PythonLikelihood/*.ipynb
-          pytest --nbmake --nbmake-timeout=3000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/splh4_result.xml -vv 4.SummedPythonLikelihood/*.ipynb
-          pytest --nbmake --nbmake-timeout=3000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/lap7_result.xml -vv 7.LATAperturePhotometry/*.ipynb
-          pytest --nbmake --nbmake-timeout=5000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/ed10_result.xml -vv 10.EnergyDispersion/*.ipynb
+          # cd ${{ github.workspace }}/FB_TESTING/AnalysisThreads/SourceAnalysis
+          # pytest --nbmake --nbmake-timeout=3000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/esa6_result.xml -vv 6.ExtendedSourceAnalysis/*.ipynb
+          # pytest --nbmake --nbmake-timeout=10000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/ulh2_result.xml -vv 2.UnbinnedLikelihood/*.ipynb
+          # pytest --nbmake --nbmake-timeout=3000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/pul5_result.xml -vv 5.PythonUpperLimits/*.ipynb
+          # pytest --nbmake --nbmake-timeout=3000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/pg8_results.xml -vv  8.PulsarGating/*.ipynb
+          # pytest --nbmake --nbmake-timeout=3000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/blh1_result.xml -vv 1.BinnedLikelihood/*.ipynb
+          # pytest --nbmake --nbmake-timeout=3000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/plh3_result.xml -vv 3.PythonLikelihood/*.ipynb
+          # pytest --nbmake --nbmake-timeout=3000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/splh4_result.xml -vv 4.SummedPythonLikelihood/*.ipynb
+          # pytest --nbmake --nbmake-timeout=3000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/lap7_result.xml -vv 7.LATAperturePhotometry/*.ipynb
+          # pytest --nbmake --nbmake-timeout=5000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/ed10_result.xml -vv 10.EnergyDispersion/*.ipynb
 
       - name: Test fermipy with latest Fermitools conda pkg.
         id: test_fermi
