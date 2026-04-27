@@ -30,6 +30,7 @@ dependencies:
       - LATSourceModel
       - astropy-iers-data
       - aplpy
+      - pytest-xdist
       - git+https://github.com/fermiPy/fermipy.git
       - git+https://github.com/threeML/threeML.git
       - git+https://github.com/threeML/astromodels.git
