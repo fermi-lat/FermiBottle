@@ -25,6 +25,7 @@ dependencies:
   - seaborn
   - "fermitools==2.5.*"
   - "fermitools-data"
+  - pyregion
   - pip:
       - LATSourceModel
       - astropy-iers-data
