@@ -82,7 +82,7 @@ jobs:
       - name: Build and push Docker image
         run: |
           # $GITHUB_WORKSPACE/FermiBottle/docker
-          docker build --platform linux/${{ matrix.platform }} -t ${{ env.TEST_TAG }}-${{ matrix.platform }} "$GITHUB_WORKSPACE/FermiBottle/docker/Dockerfile"
+          docker build --platform linux/${{ matrix.platform }} -t ${{ env.TEST_TAG }}-${{ matrix.platform }} -f "$GITHUB_WORKSPACE/FermiBottle/docker/Dockerfile"
           docker push ${{ env.TEST_TAG }}-${{ matrix.platform }}
 
       - name: Run Test script in container
