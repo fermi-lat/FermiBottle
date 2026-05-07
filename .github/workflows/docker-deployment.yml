@@ -1,4 +1,4 @@
-name: fermibottle ci 
+name: fermibottle linux ci 
 on:
   push:
     branches: [ "master" ]
@@ -21,12 +21,18 @@ env:
   LATEST_TAG: fermi-lat/fermibottle2026:latest
 
 jobs:
-  docker:
+  build_docker:
+    runs-on: ${{ matrix.runner }}
     strategy:
+      fail-fast: false  # Runs all matrix combinations even if some fail
       matrix:
-        os: [ubuntu-24.04-arm, ubuntu-24.04]
-    # ubuntu-24.04-arm, ubuntu-24.04
-    runs-on: ${{ matrix.os }}   
+        platform: [amd64, arm64]
+        include:
+          - platform: amd64
+            runner: ubuntu-24.04
+          - platform: arm64
+            runner: ubuntu-24.04-arm
+
     steps:
       - name: Checkout FermiBottle repository
         uses: actions/checkout@v6
@@ -63,15 +69,20 @@ jobs:
         # with:
         #  buildkitd-flags: --debug
 
-      - name: Build and TEST
-        uses: docker/build-push-action@v7
-        with:
-          context: $GITHUB_WORKSPACE/FermiBottle/docker
-          platforms: linux/arm64 
-          load: true
-          push: true
-          tags: ${{ env.TEST_TAG }}
-          # file: ./docker/Dockerfile 4,linux/arm64, linux/amd64
+      # - name: Build and TEST
+      #   uses: docker/build-push-action@v7
+      #  with:
+      #    context: $GITHUB_WORKSPACE/FermiBottle/docker
+      #    platforms: linux/arm64 
+      #    load: true
+      #    push: true
+      #    tags: ${{ env.TEST_TAG }}
+      #    # file: ./docker/Dockerfile 4,linux/arm64, linux/amd64
+
+      - name: Build and push Docker image
+        run: |
+          docker build --platform linux/${{ matrix.platform }} -t ${{ env.TEST_TAG }}-${{ matrix.platform }} .
+          docker push ${{ env.TEST_TAG }}-${{ matrix.platform }}
 
       - name: Run Test script in container
         # -v mounts the current workspace to /app inside the container
