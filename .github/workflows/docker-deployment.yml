@@ -1,4 +1,4 @@
-name: fermibottle linux ci 
+name: fermibottle ci Multi-Arch Build
 on:
   push:
     branches: [ "master" ]
@@ -17,91 +17,50 @@ on:
         default: 'warning'
 
 env:
-  TEST_TAG: fssc/fermibottle_lite
+  TEST_TAG: fssc/fermibottle_lite:2026.05.08
   LATEST_TAG: fermi-lat/fermibottle2026:latest
-  DATE: 2026.05.08 #$(date +'%m-%d-%Y')
 
 jobs:
-  build_docker:
-    runs-on: ${{ matrix.runner }}
+  build:
     strategy:
-      fail-fast: false  # Runs all matrix combinations even if some fail
       matrix:
-        platform: [amd64, arm64]
         include:
-          - platform: amd64
-            runner: ubuntu-24.04
-          - platform: arm64
-            runner: ubuntu-24.04-arm
-
+          - arch: amd64
+            runner: ubuntu-latest
+          - arch: arm64
+            runner: ubuntu-24.04-arm # Use native ARM runners for better performance
+    runs-on: ${{ matrix.runner }}
     steps:
-      - name: Checkout FermiBottle repository
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Login to GHCR
+        uses: docker/login-action@v3
         with:
-          path: $GITHUB_WORKSPACE/FermiBottle # Clones to $GITHUB_WORKSPACE/FermiBottle
-
-      # - name: Set current date
-      #  run: "echo \"DATE=$(date +'%m-%d-%Y')\"" >> $GITHUB_ENV
-
-      - name: Run tests from ScienceTools against FermiBottle
-        uses: actions/checkout@v6
-        with:
-          repository: fermi-lat/ScienceTools # Specify the other repo's name
-          path: ScienceTools # Clones to $GITHUB_WORKSPACE/ScienceTools
-
-      # - name: Use Docker in rootless mode.
-      #  uses: ScribeMD/rootless-docker@0.2.2
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v4
-        with:
+          registry: ghcr.io
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and Push Architecture-Specific Image
+        uses: docker/build-push-action@v6
+        with:
+          platforms: linux/${{ matrix.arch }}
+          push: true
+          tags: ghcr.io/${{ github.repository }}/${{ env.TEST_TAG }}-${{ matrix.arch }}
 
-      # - name: Set up QEMU
-      #  uses: docker/setup-qemu-action@v3
-
-      - name: Check inside
-        id: confirm_inside_env
-        run: |
-           echo "look around  jsa"
-           pwd
-           ls -l
-
+  merge:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-        # with:
-        #  buildkitd-flags: --debug
-
-      # - name: Build and TEST
-      #   uses: docker/build-push-action@v7
-      #  with:
-      #    context: $GITHUB_WORKSPACE/FermiBottle/docker
-      #    platforms: linux/arm64 
-      #    load: true
-      #    push: true
-      #    tags: ${{ env.TEST_TAG }}
-      #    # file: ./docker/Dockerfile 4,linux/arm64, linux/amd64
-
-      - name: Build and push Docker image
+        uses: docker/setup-buildx-action@v3
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Create Multi-Arch Manifest
         run: |
-          # $GITHUB_WORKSPACE/FermiBottle/docker
-          docker build --platform linux/${{ matrix.platform }} -t ${{ env.TEST_TAG }}-${{ matrix.platform }}:${{ env.DATE }} -f docker/Dockerfile .
-          docker push ${{ env.TEST_TAG }}-${{ matrix.platform }}
-
-      - name: Run Test script in container
-        # -v mounts the current workspace to /app inside the container
-        # -w sets the working directory inside the container
-        run: |
-          docker run \
-            -w /home/fermi \
-            ${{ env.TEST_TAG }} \
-            sh ./test_fermibottle.sh
-
-#      - name: Build and push
-#        uses: docker/build-push-action@v7
-#        with:
-#          platforms: linux/amd64,linux/arm64
-#          load: true
-#          push: false
-#          tags: ${{ env.LATEST_TAG }}
+          docker buildx imagetools create -t ghcr.io/${{ github.repository }}/${{ env.TEST_TAG }} \
+            ghcr.io/${{ github.repository }}/${{ env.TEST_TAG }}-amd64 \
+            ghcr.io/${{ github.repository }}/${{ env.TEST_TAG }}-arm64
