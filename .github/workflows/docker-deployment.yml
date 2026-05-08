@@ -17,8 +17,9 @@ on:
         default: 'warning'
 
 env:
-  TEST_TAG: fssc/fermibottle_lite:2026.03.24
+  TEST_TAG: fssc/fermibottle_lite
   LATEST_TAG: fermi-lat/fermibottle2026:latest
+  DATE: $(date +'%m-%d-%Y')
 
 jobs:
   build_docker:
@@ -38,6 +39,9 @@ jobs:
         uses: actions/checkout@v6
         with:
           path: $GITHUB_WORKSPACE/FermiBottle # Clones to $GITHUB_WORKSPACE/FermiBottle
+
+      # - name: Set current date
+      #  run: "echo \"DATE=$(date +'%m-%d-%Y')\"" >> $GITHUB_ENV
 
       - name: Run tests from ScienceTools against FermiBottle
         uses: actions/checkout@v6
@@ -82,7 +86,7 @@ jobs:
       - name: Build and push Docker image
         run: |
           # $GITHUB_WORKSPACE/FermiBottle/docker
-          docker build --platform linux/${{ matrix.platform }} -t ${{ env.TEST_TAG }}-${{ matrix.platform }} -f "$GITHUB_WORKSPACE/FermiBottle/docker/Dockerfile"
+          docker build --platform linux/${{ matrix.platform }} -t ${{ env.TEST_TAG }}-${{ matrix.platform }}:${{ env.DATE }} -f "$GITHUB_WORKSPACE/FermiBottle/docker/Dockerfile" .
           docker push ${{ env.TEST_TAG }}-${{ matrix.platform }}
 
       - name: Run Test script in container
