@@ -19,7 +19,7 @@ on:
 env:
   TEST_TAG: fssc/fermibottle_lite
   LATEST_TAG: fermi-lat/fermibottle2026:latest
-  DATE: $(date +'%m-%d-%Y')
+  DATE: 2026.05.08 #$(date +'%m-%d-%Y')
 
 jobs:
   build_docker:
