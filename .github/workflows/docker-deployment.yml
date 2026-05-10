@@ -34,17 +34,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
       - name: Login to GHCR
         uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           # registry: ghcr.io
+
+
+      - name: Check inside
+        id: confirm_inside_env
+        run: |
+           echo "look around  jsa"
+           pwd
+           ls -l
+           ls -l ${{ github.workspace }}/FermiBottle/docker
+           ls -l ${{ github.workspace }}
+
       - name: Build and Push Architecture-Specific Image
         uses: docker/build-push-action@v7
         with:
-          # context: $GITHUB_WORKSPACE/FermiBottle/docker
+          context: ${{ github.workspace }}/FermiBottle/docker
           platforms: linux/${{ matrix.arch }}
           push: true
           tags: ${{ env.TEST_TAG }}-${{ matrix.arch }}
