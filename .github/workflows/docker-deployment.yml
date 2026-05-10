@@ -46,7 +46,8 @@ jobs:
           context: $GITHUB_WORKSPACE/FermiBottle/docker
           platforms: linux/${{ matrix.arch }}
           push: true
-          tags: ghcr.io/${{ github.repository }}/${{ env.TEST_TAG }}-${{ matrix.arch }}
+          tags: ${{ env.TEST_TAG }}-${{ matrix.arch }}
+          #  ghcr.io/${{ github.repository }}/${{ env.TEST_TAG }}-${{ matrix.arch }}
           # tags: ${{ env.TEST_TAG }}          
 
 
@@ -64,6 +65,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Create Multi-Arch Manifest
         run: |
-          docker buildx imagetools create -t ghcr.io/${{ github.repository }}/${{ env.TEST_TAG }} \
-            ghcr.io/${{ github.repository }}/${{ env.TEST_TAG }}-amd64 \
-            ghcr.io/${{ github.repository }}/${{ env.TEST_TAG }}-arm64
+          # ghcr.io/${{ github.repository }}/${{ env.TEST_TAG }}-amd64 \ ghcr.io/${{ github.repository }}/${{ env.TEST_TAG }}-arm64 
+          docker buildx imagetools create -t ${{ env.TEST_TAG }} \
+            ${{ env.TEST_TAG }}-amd64 \
+            ${{ env.TEST_TAG }}-arm64
