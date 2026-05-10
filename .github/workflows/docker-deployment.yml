@@ -23,6 +23,7 @@ env:
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         include:
           - arch: amd64
@@ -43,7 +44,7 @@ jobs:
       - name: Build and Push Architecture-Specific Image
         uses: docker/build-push-action@v7
         with:
-          context: $GITHUB_WORKSPACE/FermiBottle/docker
+          # context: $GITHUB_WORKSPACE/FermiBottle/docker
           platforms: linux/${{ matrix.arch }}
           push: true
           tags: ${{ env.TEST_TAG }}-${{ matrix.arch }}
