@@ -35,28 +35,31 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Login to GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
-          registry: ghcr.io
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+          # registry: ghcr.io
       - name: Build and Push Architecture-Specific Image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
+          context: $GITHUB_WORKSPACE/FermiBottle/docker
           platforms: linux/${{ matrix.arch }}
           push: true
           tags: ghcr.io/${{ github.repository }}/${{ env.TEST_TAG }}-${{ matrix.arch }}
+          # tags: ${{ env.TEST_TAG }}          
+
 
   merge:
     runs-on: ubuntu-latest
     needs: build
     steps:
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
       - name: Login to GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
-          registry: ghcr.io
+          # registry: ghcr.io
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Create Multi-Arch Manifest
