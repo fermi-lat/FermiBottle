@@ -50,12 +50,12 @@ jobs:
            pwd
            ls -l
            ls -l ${{ github.workspace }}/FermiBottle/docker
-           ls -l ${{ github.workspace }}
+           ls -l ${{ github.workspace }}/docker
 
       - name: Build and Push Architecture-Specific Image
         uses: docker/build-push-action@v7
         with:
-          context: ${{ github.workspace }}/FermiBottle/docker
+          context: docker/
           platforms: linux/${{ matrix.arch }}
           push: true
           tags: ${{ env.TEST_TAG }}-${{ matrix.arch }}
