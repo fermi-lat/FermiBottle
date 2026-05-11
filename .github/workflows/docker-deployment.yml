@@ -26,9 +26,11 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - arch: amd64
+          - arch_full: linux/amd64
+            arch: amd64
             runner: ubuntu-latest
-          - arch: arm64
+          - arch_full: linux/arm64
+            arch: arm64
             runner: ubuntu-24.04-arm # Use native ARM runners for better performance
     runs-on: ${{ matrix.runner }}
     steps:
@@ -56,12 +58,21 @@ jobs:
         uses: docker/build-push-action@v7
         with:
           context: docker
-          platforms: linux/${{ matrix.arch }}
+          platforms: ${{ matrix.arch_full }} # linux/${{ matrix.arch }}
           push: true
+          load: true
           tags: ${{ env.TEST_TAG }}-${{ matrix.arch }}
           #  ghcr.io/${{ github.repository }}/${{ env.TEST_TAG }}-${{ matrix.arch }}
           # tags: ${{ env.TEST_TAG }}          
 
+      - name: Run Test script in container
+        # -v mounts the current workspace to /app inside the container
+        # -w sets the working directory inside the container
+        run: |
+          docker run \
+            -w /home/fermi \
+            ${{ env.TEST_TAG }} \
+            sh ./test_fermibottle.sh
 
   merge:
     runs-on: ubuntu-latest
