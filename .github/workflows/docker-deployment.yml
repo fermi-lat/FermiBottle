@@ -74,6 +74,25 @@ jobs:
             ${{ env.TEST_TAG }} \
             sh ./test_fermibottle.sh
 
+      # The layout for this reporting action works. Not sure if there is something better, but it does a good job for us.
+      - name: Publish Test Results Linux
+        uses: EnricoMi/publish-unit-test-result-action/linux@v2
+        if: runner.os == 'Linux'
+        with:
+          check_name: "Test Results: Fermipy ${{ matrix.arch_full }}"
+          files: | 
+             ${{ github.workspace }}/FB_TESTING/test_results/*.xml
+             !${{ github.workspace }}/FB_TESTING/test_results/myDoc.xml
+          
+      - name: Publish Test Results OSX
+        uses: EnricoMi/publish-unit-test-result-action/macos@v2
+        if: runner.os == 'macOS'
+        with:
+          check_name: "Test Results: Fermi env ${{ matrix.arch_full }}"
+          files: |
+             ${{ github.workspace }}/FB_TESTING/test_results/*.xml
+             !${{ github.workspace }}/FB_TESTING/test_results/myDoc.xml
+
   merge:
     runs-on: ubuntu-latest
     needs: build

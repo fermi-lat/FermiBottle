@@ -32,13 +32,13 @@ conda install ipykernel nb_conda_kernels  astropy junit-xml pytest -y
 cd /home/fermi/FB_TESTING/test_results/
 ../ScienceTools/recipe/tests/ST-unit-test -w -d -v
 ../ScienceTools/recipe/tests/ST-AGN-thread-test -w -d -v
-pytest --junitxml=fermipy_results.xml -vv --pyargs fermipy
+pytest -n auto --junitxml=fermipy_results.xml -vv --pyargs fermipy
 pytest --junitxml=threeml_results.xml -vv --pyargs threeML
 # pytest --junitxml=threeml_results.xml -vv --pyargs astromodels
 ### cd ../fermi-summer-school/
 ### pytest --nbmake --nbmake-timeout=1000000 --junitxml=/home/fermi/FB_TESTING/test_results/fss_Likelihood_adv_result.xml -vv Likelihood_Advanced/*.ipynb
 cd /home/fermi/FB_TESTING/fermi-summer-school/
-pytest --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_results/data_quicklook_result.xml -vv Data_Exploration/*.ipynb
+pytest -n auto --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_results/data_quicklook_result.xml -vv Data_Exploration/*.ipynb
 ## pytest --nbmake --nbmake-timeout=10000 --junitxml=/home/fermi/FB_TESTING/test_results/de_data_expl_result.xml  -vv Data_Exploration/Data_Exploration.ipynb 
 # echo "Setup complete: Env $ENV_NAME activated, repo cloned, and test_results created."
 
@@ -48,21 +48,21 @@ pytest --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_res
 
 cd /home/fermi/FB_TESTING/AnalysisThreads/SourceAnalysis
 # Currently failing
-pytest --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_results/esa6_result.xml -vv 6.ExtendedSourceAnalysis/*.ipynb
-pytest --nbmake --nbmake-timeout=10000 --junitxml=/home/fermi/FB_TESTING/test_results/ulh2_result.xml -vv 2.UnbinnedLikelihood/*.ipynb
-pytest --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_results/pul5_result.xml -vv 5.PythonUpperLimits/*.ipynb
-pytest --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_results/pg8_results.xml -vv  8.PulsarGating/*.ipynb
+pytest -n auto --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_results/esa6_result.xml -vv 6.ExtendedSourceAnalysis/*.ipynb
+pytest -n auto --nbmake --nbmake-timeout=10000 --junitxml=/home/fermi/FB_TESTING/test_results/ulh2_result.xml -vv 2.UnbinnedLikelihood/*.ipynb
+pytest -n auto --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_results/pul5_result.xml -vv 5.PythonUpperLimits/*.ipynb
+pytest -n auto --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_results/pg8_results.xml -vv  8.PulsarGating/*.ipynb
 
 # Should work, running in cicd
-pytest --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_results/blh1_result.xml -vv 1.BinnedLikelihood/*.ipynb
-pytest --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_results/plh3_result.xml -vv 3.PythonLikelihood/*.ipynb
-pytest --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_results/splh4_result.xml -vv 4.SummedPythonLikelihood/*.ipynb
-pytest --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_results/lap7_result.xml -vv 7.LATAperturePhotometry/*.ipynb
-pytest --nbmake --nbmake-timeout=5000 --junitxml=/home/fermi/FB_TESTING/test_results/ed10_result.xml -vv 10.EnergyDispersion/*.ipynb
+pytest -n auto --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_results/blh1_result.xml -vv 1.BinnedLikelihood/*.ipynb
+pytest -n auto --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_results/plh3_result.xml -vv 3.PythonLikelihood/*.ipynb
+pytest -n auto --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_results/splh4_result.xml -vv 4.SummedPythonLikelihood/*.ipynb
+pytest -n auto --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_results/lap7_result.xml -vv 7.LATAperturePhotometry/*.ipynb
+pytest -n auto --nbmake --nbmake-timeout=5000 --junitxml=/home/fermi/FB_TESTING/test_results/ed10_result.xml -vv 10.EnergyDispersion/*.ipynb
 
 conda deactivate
 conda activate fermigbm
 cd /home/fermi/FB_TESTING/gdt-fermi/docs/notebooks
 for f in *.tar; do tar -xf "$f"; done
-pytest --nbmake --nbmake-timeout=10000 --junitxml=/home/fermi/FB_TESTING/test_results/gdt_fermi_results.xml -vv *.ipynb
+pytest -n auto --nbmake --nbmake-timeout=10000 --junitxml=/home/fermi/FB_TESTING/test_results/gdt_fermi_results.xml -vv *.ipynb
 echo "Setup complete: Env fermigbm"
