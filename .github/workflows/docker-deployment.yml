@@ -17,8 +17,8 @@ on:
         default: 'warning'
 
 env:
-  TEST_TAG: fssc/fermibottle_lite
-  LATEST_TAG: fermi-lat/fermibottle2026:latest
+  TEST_TAG: fssc/fermibottle_lite:05102026
+  LATEST_TAG: fssc/fermibottle:2026
 
 jobs:
   build:
@@ -58,6 +58,8 @@ jobs:
            ls -l
            # ls -l ${{ github.workspace }}/FermiBottle/docker
            ls -l ${{ github.workspace }}/docker
+           echo "docker tag ${{ env.DOCKER_TAG}}"
+           echo "docker tag $DOCKER_TAG"
 
       - name: Build and Push Architecture-Specific Image
         uses: docker/build-push-action@v7
@@ -66,7 +68,7 @@ jobs:
           platforms: ${{ matrix.arch_full }} # linux/${{ matrix.arch }}
           push: true
           load: true
-          tags: ${{ env.TEST_TAG }}\:${{ env.DOCKER_TAG}}-${{ matrix.arch }}
+          tags: ${{ env.TEST_TAG }}-${{ matrix.arch }}
           #  ghcr.io/${{ github.repository }}/${{ env.TEST_TAG }}-${{ matrix.arch }}
           # tags: ${{ env.TEST_TAG }}          
 
@@ -76,7 +78,7 @@ jobs:
         run: |
           docker run \
             -w /home/fermi \
-            "${{ env.TEST_TAG }}\:${{ env.DOCKER_TAG}}" \
+            ${{ env.TEST_TAG }} \
             sh ./test_fermibottle.sh
 
       # The layout for this reporting action works. Not sure if there is something better, but it does a good job for us.
@@ -113,6 +115,6 @@ jobs:
       - name: Create Multi-Arch Manifest
         run: |
           # ghcr.io/${{ github.repository }}/${{ env.TEST_TAG }}-amd64 \ ghcr.io/${{ github.repository }}/${{ env.TEST_TAG }}-arm64 
-          docker buildx imagetools create -t "${{ env.TEST_TAG }}\:${{ env.DOCKER_TAG}}" \
-            "${{ env.TEST_TAG }}\:${{ env.DOCKER_TAG}}-amd64" \
-            "${{ env.TEST_TAG }}\:${{ env.DOCKER_TAG}}-arm64"
+          docker buildx imagetools create -t ${{ env.TEST_TAG }} \
+            ${{ env.TEST_TAG }}-amd64 \
+            ${{ env.TEST_TAG }}-arm64
