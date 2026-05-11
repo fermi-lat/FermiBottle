@@ -11,7 +11,20 @@ REPO_URL="https://github.com/fermi-lat/ScienceTools.git" # URL of the repo
 # /opt/anaconda/lib/python3.12/site-packages/conda/shell/etc/profile.d/conda.sh
 
 mkdir -p /home/fermi/FB_TESTING
+mkdir -p /home/fermi/FB_TESTING/test_results
+
 cd /home/fermi/FB_TESTING/
+
+wget https://fermi.gsfc.nasa.gov/ssc/data/analysis/scitools/data/SummerSchool/Likelihood_rcw103.tgz
+wget https://fermi.gsfc.nasa.gov/ssc/data/analysis/scitools/data/SummerSchool/Likelihood_rxj1713.tgz
+tar -xvf Likelihood_rxj1713.tgz
+rm -f Likelihood_rxj1713.tgz
+cd Likelihood_rxj1713/
+pytest --nbmake -n auto --nbmake-timeout=6000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/ss_real_exe_rxj1713_result.xml -vv Realtime_execution_RXJ1713.ipynb
+cd ../
+tar -xvf Likelihood_rcw103.tgz
+cd Likelihood_rcw103/
+pytest --nbmake -n auto --nbmake-timeout=6000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/ss_real_exe_rcw103_result.xml -vv Realtime_execution_RCW103.ipynb
 
 # --- Git Clone ---
 git clone "$REPO_URL"
@@ -21,7 +34,6 @@ git clone "https://github.com/fermi-lat/AnalysisThreads.git"
 
 cd ScienceTools/
 # --- Create Directory ---
-mkdir -p /home/fermi/FB_TESTING/test_results
 
 # Activate the environment
 # Initialize conda for this shell session
@@ -33,18 +45,8 @@ cd /home/fermi/FB_TESTING/test_results/
 ../ScienceTools/recipe/tests/ST-unit-test -w -d -v
 ../ScienceTools/recipe/tests/ST-AGN-thread-test -w -d -v
 pytest -n auto --junitxml=fermipy_results.xml -vv --pyargs fermipy
-pytest --junitxml=threeml_results.xml -vv --pyargs threeML
+pytest -n auto --junitxml=threeml_results.xml -vv --pyargs threeML
 # pytest --junitxml=threeml_results.xml -vv --pyargs astromodels
-### cd ../fermi-summer-school/
-### pytest --nbmake --nbmake-timeout=1000000 --junitxml=/home/fermi/FB_TESTING/test_results/fss_Likelihood_adv_result.xml -vv Likelihood_Advanced/*.ipynb
-cd /home/fermi/FB_TESTING/fermi-summer-school/
-pytest -n auto --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_results/data_quicklook_result.xml -vv Data_Exploration/*.ipynb
-## pytest --nbmake --nbmake-timeout=10000 --junitxml=/home/fermi/FB_TESTING/test_results/de_data_expl_result.xml  -vv Data_Exploration/Data_Exploration.ipynb 
-# echo "Setup complete: Env $ENV_NAME activated, repo cloned, and test_results created."
-
-# cd /home/fermi/FB_TESTING/AnalysisThreads/
-# pytest --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_results/de_data_expl_result.xml  -vv Data_Exploration/Data_Exploration.ipynb
-
 
 cd /home/fermi/FB_TESTING/AnalysisThreads/SourceAnalysis
 # Currently failing
@@ -59,6 +61,29 @@ pytest -n auto --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/
 pytest -n auto --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_results/splh4_result.xml -vv 4.SummedPythonLikelihood/*.ipynb
 pytest -n auto --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_results/lap7_result.xml -vv 7.LATAperturePhotometry/*.ipynb
 pytest -n auto --nbmake --nbmake-timeout=5000 --junitxml=/home/fermi/FB_TESTING/test_results/ed10_result.xml -vv 10.EnergyDispersion/*.ipynb
+
+# cd /home/fermi/FB_TESTING/
+# wget https://fermi.gsfc.nasa.gov/ssc/data/analysis/scitools/data/SummerSchool/Likelihood_rcw103.tgz
+# wget https://fermi.gsfc.nasa.gov/ssc/data/analysis/scitools/data/SummerSchool/Likelihood_rxj1713.tgz
+# tar -xvf Likelihood_rxj1713.tgz
+# rm -f Likelihood_rxj1713.tgz
+# cd Likelihood_rxj1713/
+# pytest --nbmake -n auto --nbmake-timeout=6000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/ss_real_exe_rxj1713_result.xml -vv Realtime_execution_RXJ1713.ipynb
+# cd ../
+#tar -xvf Likelihood_rcw103.tgz
+# cd Likelihood_rcw103/
+# pytest --nbmake -n auto --nbmake-timeout=6000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/ss_real_exe_rcw103_result.xml -vv Realtime_execution_RCW103.ipynb
+
+### cd ../fermi-summer-school/
+### pytest --nbmake --nbmake-timeout=1000000 --junitxml=/home/fermi/FB_TESTING/test_results/fss_Likelihood_adv_result.xml -vv Likelihood_Advanced/*.ipynb
+cd /home/fermi/FB_TESTING/fermi-summer-school/
+pytest -n auto --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_results/data_quicklook_result.xml -vv Data_Exploration/*.ipynb
+pytest -n auto --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_results/find_source_results.xml -vv Advanced_Topics/FindSource/*.ipynb
+# Broken
+pytest -n auto --nbmake -n auto --nbmake-timeout=3000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/fss_like_adv_fermipy_result.xml -vv Likelihood_Advanced/Likelihood\ With\ fermiPy.ipynb  
+pytest -n auto --nbmake -n auto --nbmake-timeout=3000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/fss_like_adv_curvature_result.xml -vv Likelihood_Advanced/Curvature\ Test.ipynb   
+pytest -n auto --nbmake -n auto --nbmake-timeout=3000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/fss_like_adv_lightcurve_result.xml -vv Likelihood_Advanced/Lightcurve.ipynb  
+pytest -n auto --nbmake -n auto --nbmake-timeout=3000 --junitxml=${{ github.workspace }}/FB_TESTING/test_results/fss_like_adv_sed_result.xml -vv Likelihood_Advanced/SED\ Stuff.ipynb
 
 conda deactivate
 conda activate fermigbm
