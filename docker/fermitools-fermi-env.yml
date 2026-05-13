@@ -33,7 +33,7 @@ dependencies:
       - aplpy
       - pytest-xdist
       - https://anaconda.org/jasercion/pyregion/2.3.1.dev7+g501f368/download/pyregion-2.3.1.dev7+g501f368.tar.gz
-      - git+https://github.com/fermiPy/fermipy.git
       - git+https://github.com/threeML/threeML.git
       - git+https://github.com/threeML/astromodels.git
+      # - git+https://github.com/fermiPy/fermipy.git
       # - pyds9

@@ -63,8 +63,8 @@ jobs:
           context: docker
           platforms: ${{ matrix.arch_full }} # linux/${{ matrix.arch }}
           push: true
-          load: true
           tags: ${{ env.TEST_TAG }}-${{ matrix.arch }}
+          # load: true
           #  ghcr.io/${{ github.repository }}/${{ env.TEST_TAG }}-${{ matrix.arch }}
           # tags: ${{ env.TEST_TAG }}          
 

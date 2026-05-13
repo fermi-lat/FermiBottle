@@ -170,13 +170,17 @@ RUN sed -i '89,91d' ${CONDAPFX}/envs/fermi/etc/conda/activate.d/activate_fermito
 ### RUN  $MAMBA install --name fermi https://anaconda.org/conda-forge/fermipy/1.4.0/download/noarch/fermipy-1.4.0-pyh885dcc9_0.conda 
 # && $MAMBA clean -afy
 
+# Probably could remove these:
 # RUN --mount=type=cache,target=/home/fermi/.cache/pip $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir -c threeml/label/dev threeml &&\
 RUN --mount=type=cache,target=/home/fermi/.cache/pip $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir pyds9 LATSourceModel threeml astromodels astropy-iers-data \
-git+https://github.com/fermiPy/fermipy.git \
 git+https://github.com/threeML/threeML.git \
 git+https://github.com/threeML/astromodels.git
+# git+https://github.com/fermiPy/fermipy.git \
 #     git+https://github.com/threeML/threeML.git 
 # pint-pulsar \
+# https://api.anaconda.org/download/conda-forge/fermipy/1.4.1/noarch/fermipy-1.4.1-pyhd8ed1ab_0.conda
+
+RUN  $MAMBA install --name fermi https://api.anaconda.org/download/conda-forge/fermipy/1.4.1/noarch/fermipy-1.4.1-pyhd8ed1ab_0.conda
 
 
 # RUN $MAMBA clean -afy
