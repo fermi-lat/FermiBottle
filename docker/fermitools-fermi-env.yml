@@ -27,6 +27,7 @@ dependencies:
   - "fermitools-data"
   - pyregion
   - pip:
+      - "numpy==1.26.*"
       - LATSourceModel
       - astropy-iers-data
       - aplpy
