@@ -2,13 +2,18 @@ name: fermitools-fermi-env-testing
 channels:
   - conda-forge
   - fermi
+  - threeml
+  - astropy 
 dependencies:
   - "python-tzdata==2025.3"
   - python=3.11
-  - pip # Required to use the pip section below
+  - aplpy
   - pytest
+  - astromodels 
+  - threeml
   - junit-xml
   - astropy
+  - astropy-iers-data
   - ipykernel 
   - nb_conda_kernels
   - "gammapy==2.0.*"
@@ -26,14 +31,4 @@ dependencies:
   - "fermitools==2.5.*"
   - "fermitools-data"
   - pyregion
-  - pip:
-      - "numpy==1.26.*"
-      - LATSourceModel
-      - astropy-iers-data
-      - aplpy
-      - pytest-xdist
-      - https://anaconda.org/jasercion/pyregion/2.3.1.dev7+g501f368/download/pyregion-2.3.1.dev7+g501f368.tar.gz
-      - git+https://github.com/threeML/threeML.git
-      - git+https://github.com/threeML/astromodels.git
-      # - git+https://github.com/fermiPy/fermipy.git
-      # - pyds9
+  - pytest-xdist
