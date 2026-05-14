@@ -10,7 +10,7 @@ dependencies:
   - aplpy
   - pytest
   - astromodels 
-  - threeml==2.4.3
+  - "threeml==2.4.3"
   - junit-xml
   - astropy
   - astropy-iers-data
