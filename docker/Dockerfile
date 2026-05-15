@@ -138,7 +138,7 @@ RUN $MAMBA create --name fermi -c fermi -c threeml -c astropy -c conda-forge --y
   healpy \
   jupyter \
   jupyter_server \
-  "threeml::threeml==2.5.0" \
+  # "threeml::threeml==2.5.0" \
   jupyter_server \
   astropy-iers-data \
   ipykernel \
@@ -151,8 +151,10 @@ RUN $MAMBA create --name fermi -c fermi -c threeml -c astropy -c conda-forge --y
   pmw \
   seaborn \
   junit-xml \
-  "threeml::astromodels==2.5.1" \
+  # "threeml::astromodels==2.5.1" \
   pytest-xdist
+
+RUN --mount=type=cache,target=/home/fermi/.cache/pip $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir pyds9 threeml astromodels 
 
 # Install JoeA's personal arm64 version of pyregion needed only for the bottle. 
 RUN --mount=type=cache,target=/home/fermi/.cache/pip  $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir aplpy https://anaconda.org/jasercion/pyregion/2.3.1.dev7+g501f368/download/pyregion-2.3.1.dev7+g501f368.tar.gz
