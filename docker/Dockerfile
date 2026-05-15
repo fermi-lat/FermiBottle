@@ -153,7 +153,6 @@ RUN $MAMBA create --name fermi -c conda-forge  -c fermi -c threeml -c astropy --
   pmw \
   seaborn \
   junit-xml \
-  pyds9 \
   pytest-xdist
 
 # Install JoeA's personal arm64 version of pyregion needed only for the bottle. 
