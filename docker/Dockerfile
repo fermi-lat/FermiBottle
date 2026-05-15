@@ -132,15 +132,15 @@ RUN $CONDABIN install --channel conda-forge --yes "mamba>=0.23" su-exec "setupto
 # Build the fermi env
 RUN $MAMBA create --name fermi -c fermi -c threeml -c astropy -c conda-forge --yes \
   "python==3.11.*" \ 
-  astropy \
+  astropy::astropy \
   gammapy \
   pgplot \
   healpy \
   jupyter \
   jupyter_server \
-  "threeml==2.5.0" \
+  "threeml::threeml==2.5.0" \
   jupyter_server \
-  astropy-iers-data \
+  astropy::astropy-iers-data \
   ipykernel \
   "numpy==1.26.*" \ 
   libpng \
@@ -151,7 +151,7 @@ RUN $MAMBA create --name fermi -c fermi -c threeml -c astropy -c conda-forge --y
   pmw \
   seaborn \
   junit-xml \
-  "astromodels==2.5.1" \
+  "threeml::astromodels==2.5.1" \
   pytest-xdist
 
 # Install JoeA's personal arm64 version of pyregion needed only for the bottle. 
