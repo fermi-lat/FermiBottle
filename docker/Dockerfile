@@ -154,7 +154,7 @@ RUN $MAMBA create --name fermi -c fermi -c threeml -c astropy -c conda-forge --y
   # "threeml::astromodels==2.5.1" \
   pytest-xdist
 
-RUN --mount=type=cache,target=/home/fermi/.cache/pip $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir "numpy==1.26.*" pyds9 threeml astromodels \
+RUN --mount=type=cache,target=/home/fermi/.cache/pip $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir "numpy==1.26.*" pyds9 \
 git+https://github.com/threeML/threeML.git \
 git+https://github.com/threeML/astromodels.git
 
@@ -164,6 +164,7 @@ RUN --mount=type=cache,target=/home/fermi/.cache/pip  $CONDAPFX/envs/fermi/bin/p
 
 # Now we can install fermitools
 RUN $MAMBA install  --name fermi -c conda-forge  -c fermi --yes \
+   "numpy==1.26.*" \
    "python==3.11.*" \
    "fermitools==2.5.*" \
    "fermitools-data" \
