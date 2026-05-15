@@ -140,7 +140,7 @@ RUN $MAMBA create --name fermi -c fermi -c threeml -c astropy -c conda-forge --y
   jupyter_server \
   "threeml::threeml==2.5.0" \
   jupyter_server \
-  astropy::astropy-iers-data \
+  astropy-iers-data \
   ipykernel \
   "numpy==1.26.*" \ 
   libpng \
