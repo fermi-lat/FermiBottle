@@ -138,7 +138,7 @@ RUN $MAMBA create --name fermi -c fermi -c threeml -c astropy -c conda-forge --y
   healpy \
   jupyter \
   jupyter_server \
-  threeml \
+  "threeml==2.5.0" \
   jupyter_server \
   astropy-iers-data \
   ipykernel \
@@ -151,7 +151,7 @@ RUN $MAMBA create --name fermi -c fermi -c threeml -c astropy -c conda-forge --y
   pmw \
   seaborn \
   junit-xml \
-  astromodels \
+  "astromodels==2.5.1" \
   pytest-xdist
 
 # Install JoeA's personal arm64 version of pyregion needed only for the bottle. 
