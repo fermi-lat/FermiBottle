@@ -130,16 +130,14 @@ RUN $CONDABIN config --set remote_connect_timeout_secs 500 &&\
 RUN $CONDABIN install --channel conda-forge --yes "mamba>=0.23" su-exec "setuptools" tini
 
 # Build the fermi env
-RUN $MAMBA create --name fermi -c conda-forge  -c fermi -c threeml -c astropy --yes \
+RUN $MAMBA create --name fermi -c fermi -c threeml -c astropy -c conda-forge --yes \
   "python==3.11.*" \ 
   astropy \
-  aplpy \
   gammapy \
   pgplot \
   healpy \
   jupyter \
   jupyter_server \
-  astromodels \
   threeml \
   jupyter_server \
   astropy-iers-data \
@@ -153,10 +151,12 @@ RUN $MAMBA create --name fermi -c conda-forge  -c fermi -c threeml -c astropy --
   pmw \
   seaborn \
   junit-xml \
+  astromodels \
   pytest-xdist
 
 # Install JoeA's personal arm64 version of pyregion needed only for the bottle. 
-RUN --mount=type=cache,target=/home/fermi/.cache/pip  $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir https://anaconda.org/jasercion/pyregion/2.3.1.dev7+g501f368/download/pyregion-2.3.1.dev7+g501f368.tar.gz
+RUN --mount=type=cache,target=/home/fermi/.cache/pip  $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir aplpy https://anaconda.org/jasercion/pyregion/2.3.1.dev7+g501f368/download/pyregion-2.3.1.dev7+g501f368.tar.gz
+
 
 # Now we can install fermitools
 RUN $MAMBA install  --name fermi -c conda-forge  -c fermi --yes \
