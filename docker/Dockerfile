@@ -130,61 +130,43 @@ RUN $CONDABIN config --set remote_connect_timeout_secs 500 &&\
 RUN $CONDABIN install --channel conda-forge --yes "mamba>=0.23" su-exec "setuptools" tini
 
 # Build the fermi env
-# "gammapy==2.0.1" \
-# "matplotlib==3.10.*" \
-RUN $MAMBA create --name fermi -c conda-forge  -c fermi --yes \
+RUN $MAMBA create --name fermi -c conda-forge  -c fermi -c threeml -c astropy --yes \
+  "python==3.11.*" \ 
   astropy \
+  aplpy \
   gammapy \
   pgplot \
   healpy \
   jupyter \
   jupyter_server \
+  astromodels \
+  threeml \
+  jupyter_server \
+  astropy-iers-data \
+  ipykernel \
+  "numpy==1.26.*" \ 
   libpng \
   matplotlib \
-  numpy \
-  "python==3.11.*" \
   pytest \
   conda-forge::nbmake \
   scipy \
   pmw \
   seaborn \
-  junit-xml 
-  # "scipy<1.14"
-#  && $MAMBA clean -afy
+  junit-xml \
+  pyds9 \
+  pytest-xdist
 
 # Install JoeA's personal arm64 version of pyregion needed only for the bottle. 
-RUN --mount=type=cache,target=/home/fermi/.cache/pip  $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir aplpy  https://anaconda.org/jasercion/pyregion/2.3.1.dev7+g501f368/download/pyregion-2.3.1.dev7+g501f368.tar.gz
+RUN --mount=type=cache,target=/home/fermi/.cache/pip  $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir https://anaconda.org/jasercion/pyregion/2.3.1.dev7+g501f368/download/pyregion-2.3.1.dev7+g501f368.tar.gz
 
 # Now we can install fermitools
 RUN $MAMBA install  --name fermi -c conda-forge  -c fermi --yes \
    "python==3.11.*" \
    "fermitools==2.5.*" \
-   "fermitools-data" 
-# && $MAMBA  clean -afy
+   "fermitools-data" \
+   "fermipy=1.4.1"
 
 RUN sed -i '89,91d' ${CONDAPFX}/envs/fermi/etc/conda/activate.d/activate_fermitools.sh
-
-# Didn't originally install in the fermi env
-
-# RUN pip install git+https://github.com/fermiPy/fermipy.git
-### RUN  $MAMBA install --name fermi https://anaconda.org/conda-forge/fermipy/1.4.0/download/noarch/fermipy-1.4.0-pyh885dcc9_0.conda 
-# && $MAMBA clean -afy
-
-# Probably could remove these:
-# RUN --mount=type=cache,target=/home/fermi/.cache/pip $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir -c threeml/label/dev threeml &&\
-
-# RUN --mount=type=cache,target=/home/fermi/.cache/pip $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir pyds9 LATSourceModel threeml astromodels astropy-iers-data \
-# git+https://github.com/threeML/threeML.git \
-# git+https://github.com/threeML/astromodels.git
-# git+https://github.com/fermiPy/fermipy.git \
-#     git+https://github.com/threeML/threeML.git 
-# pint-pulsar \
-# https://api.anaconda.org/download/conda-forge/fermipy/1.4.1/noarch/fermipy-1.4.1-pyhd8ed1ab_0.conda
-
-RUN --mount=type=cache,target=/home/fermi/.cache/pip $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir pyds9 
-
-# RUN  $MAMBA install --name fermi https://api.anaconda.org/download/conda-forge/fermipy/1.4.1/noarch/fermipy-1.4.1-pyhd8ed1ab_0.conda
-
 
 # RUN $MAMBA clean -afy
 RUN rm -rf ${CONDAPFX}/pkgs/* &&\
@@ -211,8 +193,6 @@ RUN $MAMBA create --name fermigbm -c conda-forge --yes \
     pytest \
     conda-forge::nbmake \
     "matplotlib"  # Needed for fermigbm jupyter notebook tests
-#    # && $MAMBA clean -afy
-# "scipy==1.14.1" \
 
 # Hoping to recover space from fermi and fermigdm creations
 # RUN $MAMBA clean -a --yes

@@ -5,24 +5,25 @@ channels:
   - threeml
   - astropy 
 dependencies:
-  - "python-tzdata==2025.3"
+  # - "python-tzdata==2025.3"
+  # - setuptools<82
   - python=3.11
   - aplpy
   - pytest
   - astromodels 
-  - "threeml==2.4.3"
+  - threeml
   - junit-xml
   - astropy
   - astropy-iers-data
   - ipykernel 
   - nb_conda_kernels
-  - "gammapy==2.0.*"
+  - gammapy
   - pgplot
   - healpy
   - jupyter
   - jupyter_server
   - libpng
-  - "matplotlib==3.9.*"
+  - matplotlib
   - "numpy==1.26.*"
   - conda-forge::nbmake
   - scipy
@@ -30,5 +31,6 @@ dependencies:
   - seaborn
   - "fermitools==2.5.*"
   - "fermitools-data"
+  - "fermipy=1.4.1"
   - pyregion
   - pytest-xdist
