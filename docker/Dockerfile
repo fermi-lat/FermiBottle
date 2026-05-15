@@ -133,7 +133,7 @@ RUN $CONDABIN install --channel conda-forge --yes "mamba>=0.23" su-exec "setupto
 RUN $MAMBA create --name fermi -c fermi -c threeml -c astropy -c conda-forge --yes \
   "python==3.11.*" \ 
   astropy::astropy \
-  gammapy \
+  "gammapy==2.0.1" \
   pgplot \
   healpy \
   jupyter \
@@ -231,10 +231,12 @@ COPY entrypoint $HOME/entrypoint
 
 # Keep DS9 this way, trying to merge the RUN(s) doesn't work in Azure.
 # This gives us the LATEST version of the code vs the older conda version :  01/2026 JSA 
-# RUN mkdir $ASTROPFX/bin
-# RUN curl --connect-timeout 300 -s -L https://ds9.si.edu/download/source/ds9.8.7b3.tar.gz | tar -zxv
-# WORKDIR SAOImageDS9
-# RUN unix/configure && make && cp bin/ds9 $ASTROPFX/bin/.
+RUN mkdir $ASTROPFX/bin
+
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+RUN curl --connect-timeout 300 -s -L https://ds9.si.edu/download/source/ds9.8.7.tar.gz | tar -zxv
+WORKDIR SAOImageDS9
+RUN unix/configure && make && cp bin/ds9 $ASTROPFX/bin/.
 WORKDIR ../
 
 ##########################################################################
