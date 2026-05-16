@@ -159,7 +159,7 @@ git+https://github.com/threeML/threeML.git \
 git+https://github.com/threeML/astromodels.git
 
 # Install JoeA's personal arm64 version of pyregion needed only for the bottle. 
-RUN --mount=type=cache,target=/home/fermi/.cache/pip  $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir aplpy https://anaconda.org/jasercion/pyregion/2.3.1.dev7+g501f368/download/pyregion-2.3.1.dev7+g501f368.tar.gz
+RUN --mount=type=cache,target=/home/fermi/.cache/pip  $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir "numpy==1.26.*" aplpy https://anaconda.org/jasercion/pyregion/2.3.1.dev7+g501f368/download/pyregion-2.3.1.dev7+g501f368.tar.gz
 
 
 # Now we can install fermitools
