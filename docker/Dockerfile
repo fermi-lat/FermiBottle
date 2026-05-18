@@ -156,7 +156,7 @@ RUN $MAMBA create --name fermi -c fermi -c threeml -c astropy -c conda-forge --y
   # "threeml::astromodels==2.5.1" \
   pytest-xdist
 
-RUN --mount=type=cache,target=/home/fermi/.cache/pip $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir "numpy==1.26.*" pyds9  ebltable naima pygsl \
+RUN --mount=type=cache,target=/home/fermi/.cache/pip $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir "numpy==1.26.*" pyds9  ebltable naima \
 git+https://github.com/threeML/threeML.git \
 git+https://github.com/threeML/astromodels.git
 
@@ -197,6 +197,7 @@ RUN $MAMBA create --name fermigbm -c conda-forge --yes \
     basemap \
     "python=3.11.*" \ 
     pytest \
+    pygsl \
     conda-forge::nbmake \
     "matplotlib"  # Needed for fermigbm jupyter notebook tests
 
