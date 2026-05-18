@@ -197,7 +197,6 @@ RUN $MAMBA create --name fermigbm -c conda-forge --yes \
     basemap \
     "python=3.11.*" \ 
     pytest \
-    pygsl \
     conda-forge::nbmake \
     "matplotlib"  # Needed for fermigbm jupyter notebook tests
 
