@@ -50,6 +50,7 @@ RUN dnf install -y --enablerepo=crb --setopt=install_weak_deps=False \
   gcc-c++ \
   gcc-gfortran \
   git \
+  gsl-devel \
   hdf5-devel \
   libpng-devel \
   libSM-devel \
@@ -72,6 +73,7 @@ RUN dnf install -y --enablerepo=crb --setopt=install_weak_deps=False \
   readline-devel \
   sqlite-devel \
   sudo \
+  swig \
   tar \
   tcl-devel \
   tk-devel \
@@ -154,7 +156,7 @@ RUN $MAMBA create --name fermi -c fermi -c threeml -c astropy -c conda-forge --y
   # "threeml::astromodels==2.5.1" \
   pytest-xdist
 
-RUN --mount=type=cache,target=/home/fermi/.cache/pip $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir "numpy==1.26.*" pyds9 \
+RUN --mount=type=cache,target=/home/fermi/.cache/pip $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir "numpy==1.26.*" pyds9  ebltable naima pygsl \
 git+https://github.com/threeML/threeML.git \
 git+https://github.com/threeML/astromodels.git
 
