@@ -132,15 +132,23 @@ RUN $CONDABIN config --set remote_connect_timeout_secs 500 &&\
 RUN $CONDABIN install --channel conda-forge --yes "mamba>=0.23" su-exec "setuptools" tini
 
 # Build the fermi env -c threeml
-RUN $MAMBA create --name fermi -c fermi -c astropy -c threeml -c conda-forge --yes \
+# RUN $CONDABIN create --name threeml-fermi -c threeml/label/dev astromodels threeml -y
+#  -c threeml -c fermi -c conda-forge fermitools astromodels threeml fermipy
+# "astromodels==2.5.1" "threeml==2.5.0"  -c threeml -c conda-forge
+# -c threeml  "python==3.11.*"  "astromodels==2.5.1" "threeml==2.5.0" jupyter  "numpy==1.26.*"  "fermitools==2.5.*" -c fermi -c astropy -c conda-forge --yes 
+
+RUN $MAMBA create --name fermi -c fermi -c astropy -c threeml/label/dev -c conda-forge --yes \
   "python==3.11.*" \ 
+  # "threeml::astromodels==2.5.1" \
+  astromodels \
+  threeml \ 
   "astropy==7.2.0" \
   "gammapy<2.1" \
   pgplot \
   healpy \
   jupyter \
   jupyter_server \
-  "threeml==2.5.0" \
+  # "threeml::threeml==2.5.0" \
   jupyter_server \
   astropy-iers-data \
   ipykernel \
@@ -154,7 +162,6 @@ RUN $MAMBA create --name fermi -c fermi -c astropy -c threeml -c conda-forge --y
   seaborn \
   junit-xml \
   # pygsl \
-  "astromodels==2.5.1" \
   pytest-xdist
 
 RUN --mount=type=cache,target=/home/fermi/.cache/pip $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir "numpy==1.26.*" pyds9  ebltable naima 
