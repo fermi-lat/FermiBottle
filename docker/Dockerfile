@@ -131,8 +131,8 @@ RUN $CONDABIN config --set remote_connect_timeout_secs 500 &&\
 
 RUN $CONDABIN install --channel conda-forge --yes "mamba>=0.23" su-exec "setuptools" tini
 
-# Build the fermi env
-RUN $MAMBA create --name fermi -c fermi -c threeml -c astropy -c conda-forge --yes \
+# Build the fermi env -c threeml
+RUN $MAMBA create --name fermi -c fermi -c astropy -c threeml -c conda-forge --yes \
   "python==3.11.*" \ 
   "astropy==7.2.0" \
   "gammapy<2.1" \
@@ -140,7 +140,7 @@ RUN $MAMBA create --name fermi -c fermi -c threeml -c astropy -c conda-forge --y
   healpy \
   jupyter \
   jupyter_server \
-  # "threeml::threeml==2.5.0" \
+  "threeml==2.5.0" \
   jupyter_server \
   astropy-iers-data \
   ipykernel \
@@ -154,12 +154,13 @@ RUN $MAMBA create --name fermi -c fermi -c threeml -c astropy -c conda-forge --y
   seaborn \
   junit-xml \
   # pygsl \
-  # "threeml::astromodels==2.5.1" \
+  "astromodels==2.5.1" \
   pytest-xdist
 
-RUN --mount=type=cache,target=/home/fermi/.cache/pip $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir "numpy==1.26.*" pyds9  ebltable naima \
-git+https://github.com/threeML/threeML.git \
-git+https://github.com/threeML/astromodels.git
+RUN --mount=type=cache,target=/home/fermi/.cache/pip $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir "numpy==1.26.*" pyds9  ebltable naima 
+# \
+# git+https://github.com/threeML/threeML.git \
+# git+https://github.com/threeML/astromodels.git
 
 # Install JoeA's personal arm64 version of pyregion needed only for the bottle. 
 RUN --mount=type=cache,target=/home/fermi/.cache/pip  $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir "numpy==1.26.*" aplpy https://anaconda.org/jasercion/pyregion/2.3.1.dev7+g501f368/download/pyregion-2.3.1.dev7+g501f368.tar.gz
