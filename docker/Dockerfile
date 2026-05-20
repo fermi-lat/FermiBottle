@@ -134,7 +134,7 @@ RUN $CONDABIN install --channel conda-forge --yes "mamba>=0.23" su-exec "setupto
 # Build the fermi env
 RUN $MAMBA create --name fermi -c fermi -c threeml -c astropy -c conda-forge --yes \
   "python==3.11.*" \ 
-  "astropy::astropy==7.2.0" \
+  "astropy==7.2.0" \
   "gammapy<2.1" \
   pgplot \
   healpy \
