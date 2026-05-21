@@ -17,7 +17,7 @@ on:
         default: 'warning'
 
 env:
-  TEST_TAG: fssc/fermibottle_lite:0520
+  TEST_TAG: fssc/fermibottle:26.05.21
   LATEST_TAG: fssc/fermibottle:2026
 
 jobs:
@@ -67,6 +67,7 @@ jobs:
           # load: true
           #  ghcr.io/${{ github.repository }}/${{ env.TEST_TAG }}-${{ matrix.arch }}
           # tags: ${{ env.TEST_TAG }}          
+
 
   merge:
     runs-on: ubuntu-latest
