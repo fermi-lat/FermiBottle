@@ -184,8 +184,8 @@ RUN $MAMBA install  --name fermi -c conda-forge  -c fermi --yes \
 RUN sed -i '89,91d' ${CONDAPFX}/envs/fermi/etc/conda/activate.d/activate_fermitools.sh
 
 # RUN $MAMBA clean -afy
-RUN rm -rf ${CONDAPFX}/pkgs/* &&\
-    chmod -R g+rwx ${CONDAPFX}
+# RUN rm -rf ${CONDAPFX}/pkgs/* &&\
+#    chmod -R g+rwx ${CONDAPFX}
 
 ########################
 # # tempo2 \
@@ -212,6 +212,10 @@ RUN $MAMBA create --name fermigbm -c conda-forge --yes \
 # Hoping to recover space from fermi and fermigdm creations
 # RUN $MAMBA clean -a --yes
 # RUN $MAMBA clean -afy
+
+# RUN $MAMBA clean -afy
+RUN rm -rf ${CONDAPFX}/pkgs/* &&\
+    chmod -R g+rwx ${CONDAPFX}
 
 # Fermitools prefix
 ENV FERMIPFX=$CONDAPFX/envs/fermi

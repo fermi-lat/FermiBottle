@@ -17,7 +17,7 @@ on:
         default: 'warning'
 
 env:
-  TEST_TAG: fssc/fermibottle:latest
+  TEST_TAG: fssc/fermibottle_lite:0527
   LATEST_TAG: fssc/fermibottle:2026
 
 jobs:
