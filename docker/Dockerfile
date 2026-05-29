@@ -139,16 +139,14 @@ RUN $CONDABIN install --channel conda-forge --yes "mamba>=0.23" su-exec "setupto
 
 RUN $MAMBA create --name fermi -c fermi -c astropy -c threeml/label/dev -c conda-forge --yes \
   "python==3.11.*" \ 
-  # "threeml::astromodels==2.5.1" \
-  astromodels \
-  threeml \ 
+  "astromodels>=2.5.0" \
+  "threeml>=2.5.0" \
   "astropy==7.2.0" \
   "gammapy<2.1" \
   pgplot \
   healpy \
   jupyter \
   jupyter_server \
-  # "threeml::threeml==2.5.0" \
   jupyter_server \
   astropy-iers-data \
   ipykernel \
