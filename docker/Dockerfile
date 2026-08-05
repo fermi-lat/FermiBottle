@@ -138,34 +138,34 @@ RUN $CONDABIN install --channel conda-forge --yes "mamba>=0.23" su-exec "setupto
 # -c threeml  "python==3.11.*"  "astromodels==2.5.1" "threeml==2.5.0" jupyter  "numpy==1.26.*"  "fermitools==2.5.*" -c fermi -c astropy -c conda-forge --yes 
 
 RUN $MAMBA create --name fermi -c fermi -c astropy -c threeml/label/dev -c conda-forge --yes \
-  "python==3.11.*" \ 
-  "astromodels>=2.5.0" \
-  "threeml>=2.5.0" \
-  "astropy==7.2.0" \
-  "gammapy<2.1" \
-  pgplot \
+  "python==3.12.*" \
+  pmw \
   healpy \
-  jupyter \
-  jupyter_server \
-  jupyter_server \
-  astropy-iers-data \
+  gammapy \
+  fermitools \
+  fermi::fermitools-data \
+  fermi::fermitools-test-scripts-data \ 
+  "numpy>2.0" \
+  "astropy<8.0.0" \
+  "scipy<1.18" \
+  "regions<0.12" \
   ipykernel \
-  "numpy==1.26.*" \ 
+  pytest \
+  pytest-cov \
+  junit-xml \
+  nb_conda_kernels \
+  jupyterlab \
+  pytest-xdist \
+  pgplot \
+  astropy-iers-data \
   libpng \
   matplotlib \
-  pytest \
   conda-forge::nbmake \
-  scipy \
-  pmw \
-  seaborn \
-  junit-xml \
-  # pygsl \
-  pytest-xdist
+  seaborn 
 
-RUN --mount=type=cache,target=/home/fermi/.cache/pip $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir "numpy==1.26.*" pyds9  ebltable naima 
-# \
-# git+https://github.com/threeML/threeML.git \
-# git+https://github.com/threeML/astromodels.git
+RUN --mount=type=cache,target=/home/fermi/.cache/pip $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir pyds9  fermipy ebltable naima \
+git+https://github.com/threeML/threeML.git@dev \
+git+https://github.com/threeML/astromodels.git@dev
 
 # Install JoeA's personal arm64 version of pyregion needed only for the bottle. 
 RUN --mount=type=cache,target=/home/fermi/.cache/pip  $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir "numpy==1.26.*" aplpy https://anaconda.org/jasercion/pyregion/2.3.1.dev7+g501f368/download/pyregion-2.3.1.dev7+g501f368.tar.gz
@@ -173,11 +173,8 @@ RUN --mount=type=cache,target=/home/fermi/.cache/pip  $CONDAPFX/envs/fermi/bin/p
 
 # Now we can install fermitools
 RUN $MAMBA install  --name fermi -c conda-forge  -c fermi --yes \
-   "numpy==1.26.*" \
-   "python==3.11.*" \
-   "fermitools==2.5.*" \
-   "fermitools-data" \
-   "fermipy=1.4.1"
+   fermitools \
+   fermitools-data 
 
 RUN sed -i '89,91d' ${CONDAPFX}/envs/fermi/etc/conda/activate.d/activate_fermitools.sh
 
