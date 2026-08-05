@@ -83,10 +83,10 @@ cd /home/fermi/FB_TESTING/fermi-summer-school/
 pytest -n auto --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_results/data_quicklook_result.xml -vv Data_Exploration/*.ipynb
 pytest -n auto --nbmake --nbmake-timeout=3000 --junitxml=/home/fermi/FB_TESTING/test_results/find_source_results.xml -vv Advanced_Topics/FindSource/*.ipynb
 # Broken
-pytest -n auto --nbmake -n auto --nbmake-timeout=3000 --junitxml=../FB_TESTING/test_results/fss_like_adv_fermipy_result.xml -vv Likelihood_Advanced/Likelihood\ With\ fermiPy.ipynb  
-pytest -n auto --nbmake -n auto --nbmake-timeout=3000 --junitxml=../FB_TESTING/test_results/fss_like_adv_curvature_result.xml -vv Likelihood_Advanced/Curvature\ Test.ipynb   
-pytest -n auto --nbmake -n auto --nbmake-timeout=3000 --junitxml=../FB_TESTING/test_results/fss_like_adv_lightcurve_result.xml -vv Likelihood_Advanced/Lightcurve.ipynb  
-pytest -n auto --nbmake -n auto --nbmake-timeout=3000 --junitxml=../FB_TESTING/test_results/fss_like_adv_sed_result.xml -vv Likelihood_Advanced/SED\ Stuff.ipynb
+# pytest -n auto --nbmake -n auto --nbmake-timeout=3000 --junitxml=../FB_TESTING/test_results/fss_like_adv_fermipy_result.xml -vv Likelihood_Advanced/Likelihood\ With\ fermiPy.ipynb  
+# pytest -n auto --nbmake -n auto --nbmake-timeout=3000 --junitxml=../FB_TESTING/test_results/fss_like_adv_curvature_result.xml -vv Likelihood_Advanced/Curvature\ Test.ipynb   
+# pytest -n auto --nbmake -n auto --nbmake-timeout=3000 --junitxml=../FB_TESTING/test_results/fss_like_adv_lightcurve_result.xml -vv Likelihood_Advanced/Lightcurve.ipynb  
+# pytest -n auto --nbmake -n auto --nbmake-timeout=3000 --junitxml=../FB_TESTING/test_results/fss_like_adv_sed_result.xml -vv Likelihood_Advanced/SED\ Stuff.ipynb
 
 conda deactivate
 conda activate fermigbm

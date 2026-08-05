@@ -124,12 +124,12 @@ ENV MAMBA_ROOT_PREFIX=${CONDAPFX}
 ENV MINIFORGE_URL="https://github.com/conda-forge/miniforge/releases/latest/download"
 ENV MINIFORGE_FILE=""
 RUN curl -s -L -O "${MINIFORGE_URL}/Miniforge3-Linux-$(uname -m).sh" &&\
-    bash "Miniforge3-Linux-$(uname -m).sh" -b -p ${CONDAPFX}
+    bash "Miniforge3-Linux-$(uname -m).sh" -b -p ${CONDAPFX} &&\
+    $CONDABIN config --set remote_connect_timeout_secs 500 &&\
+    $CONDABIN config --set remote_read_timeout_secs 500 &&\
+    $CONDABIN install --channel conda-forge --yes "mamba>=0.23" su-exec "setuptools" tini
 
-RUN $CONDABIN config --set remote_connect_timeout_secs 500 &&\
-    $CONDABIN config --set remote_read_timeout_secs 500
-
-RUN $CONDABIN install --channel conda-forge --yes "mamba>=0.23" su-exec "setuptools" tini
+## RUN $CONDABIN install --channel conda-forge --yes "mamba>=0.23" su-exec "setuptools" tini
 
 # Build the fermi env -c threeml
 # RUN $CONDABIN create --name threeml-fermi -c threeml/label/dev astromodels threeml -y
@@ -164,19 +164,21 @@ RUN $MAMBA create --name fermi -c fermi -c astropy -c threeml/label/dev -c conda
   seaborn 
 
 RUN --mount=type=cache,target=/home/fermi/.cache/pip $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir pyds9  fermipy ebltable naima \
+aplpy https://anaconda.org/jasercion/pyregion/2.3.1.dev7+g501f368/download/pyregion-2.3.1.dev7+g501f368.tar.gz \
 git+https://github.com/threeML/threeML.git@dev \
 git+https://github.com/threeML/astromodels.git@dev
 
 # Install JoeA's personal arm64 version of pyregion needed only for the bottle. 
-RUN --mount=type=cache,target=/home/fermi/.cache/pip  $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir "numpy==1.26.*" aplpy https://anaconda.org/jasercion/pyregion/2.3.1.dev7+g501f368/download/pyregion-2.3.1.dev7+g501f368.tar.gz
+# RUN --mount=type=cache,target=/home/fermi/.cache/pip  $CONDAPFX/envs/fermi/bin/pip3 install --no-cache-dir aplpy https://anaconda.org/jasercion/pyregion/2.3.1.dev7+g501f368/download/pyregion-2.3.1.dev7+g501f368.tar.gz
 
 
 # Now we can install fermitools
 RUN $MAMBA install  --name fermi -c conda-forge  -c fermi --yes \
    fermitools \
-   fermitools-data 
+   fermitools-data &&\
+   sed -i '89,91d' ${CONDAPFX}/envs/fermi/etc/conda/activate.d/activate_fermitools.sh
 
-RUN sed -i '89,91d' ${CONDAPFX}/envs/fermi/etc/conda/activate.d/activate_fermitools.sh
+## RUN sed -i '89,91d' ${CONDAPFX}/envs/fermi/etc/conda/activate.d/activate_fermitools.sh
 
 # RUN $MAMBA clean -afy
 # RUN rm -rf ${CONDAPFX}/pkgs/* &&\
@@ -308,7 +310,7 @@ RUN dnf install -y epel-release  &&\
     dnf update -y &&\
     dnf clean all
 
-RUN echo "[main]" >> /etc/dnf/dnf.conf && echo "timeout=90" >> /etc/dnf/dnf.conf
+RUN bash echo "[main]" >> /etc/dnf/dnf.conf && echo "timeout=90" >> /etc/dnf/dnf.conf
 
 # Remove compilers from FINAL image:   gcc \ gcc-c++ \  gcc-gfortran \  make \
 # perl \
@@ -352,14 +354,17 @@ rm -rf /var/cache/dnf
 
 # Give members of the wheel group sudo access to execute all commands
 # Redundantly also give this access to the fermi user
-RUN echo -e '%wheel        ALL=(ALL)       NOPASSWD: ALL\n\
+RUN bash echo -e '%wheel        ALL=(ALL)       NOPASSWD: ALL\n\
 fermi        ALL=NOPASSWD: ALL\n\
-fermi ALL=NOPASSWD: /usr/bin/dnf' >> /etc/sudoers
+fermi ALL=NOPASSWD: /usr/bin/dnf' >> /etc/sudoers    && \
+echo '/opt/anaconda/envs/fermi/lib' >> /etc/ld.so.conf.d/condalibs.conf  && \
+sed -i '135,157d' "/opt/anaconda/envs/fermi/etc/conda/activate.d/activate_fermitools.sh"
 
-RUN echo '/opt/anaconda/envs/fermi/lib' >> /etc/ld.so.conf.d/condalibs.conf 
+
+## RUN echo '/opt/anaconda/envs/fermi/lib' >> /etc/ld.so.conf.d/condalibs.conf 
 # &&\
 #    sudo /opt/anaconda/bin/conda init bash
-RUN sed -i '135,157d' "/opt/anaconda/envs/fermi/etc/conda/activate.d/activate_fermitools.sh"
+## RUN sed -i '135,157d' "/opt/anaconda/envs/fermi/etc/conda/activate.d/activate_fermitools.sh"
 
 # The entrypoint script is very important. It is the starter script run
 # by docker to prepare a specific container for an individual user.
@@ -383,4 +388,4 @@ ENTRYPOINT ["/opt/docker/bin/entrypoint"]
 ####################### NEW ADDITIONS HERE ####################################
 ###############################################################################
 
-# RUN sh $HOME/test_fermibottle.sh
+RUN sh $HOME/test_fermibottle.sh
